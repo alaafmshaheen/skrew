@@ -91,6 +91,25 @@ input.code{text-transform:uppercase;letter-spacing:.25em;text-align:center;font-
 .opp .nm{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .opp .sc{font-size:12px;color:var(--muted);font-weight:700}
 .opp .hand{display:flex;gap:5px;flex-wrap:wrap;flex:1;min-width:0}
+/* table mode: me at the bottom, others right, top and left */
+.table{flex:1;min-height:0;display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:auto minmax(0,1fr);gap:8px}
+.table .seat-top{grid-column:1 / -1;grid-row:1;display:flex;gap:6px;justify-content:center}
+.table .seat-r{grid-column:1;grid-row:2;display:flex;flex-direction:column;justify-content:center;gap:6px}
+.table .seat-l{grid-column:3;grid-row:2;display:flex;flex-direction:column;justify-content:center;gap:6px}
+.table .mid{grid-column:2;grid-row:2;min-width:0}
+.opp.side{flex-direction:column;align-items:center;width:84px;padding:6px;gap:6px}
+.opp.side .who,.opp.top .who{width:auto;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px}
+.opp.side .hand{display:grid;grid-template-columns:repeat(2,34px);gap:4px;justify-content:center;flex:0 0 auto}
+.opp.top{flex-direction:column;align-items:center;padding:6px;gap:4px;flex:1 1 0;min-width:0;max-width:220px}
+.opp.top .hand{justify-content:center;flex:0 0 auto}
+.card.c-side{--w:34px}
+.opp.side .slot.empty{--w:34px}.opp.top .slot.empty{--w:30px}
+.c-side .idx,.c-side .tag,.c-side .ttlc{display:none}
+.c-side .ico{width:62%;margin:0}
+.tbl .pile .card,.tbl .pile .empty-pile{--w:clamp(54px,14vw,80px)}
+.tbl .drawn-zone .card{--w:clamp(62px,17vw,96px)}
+.tbl .pile-row{gap:10px}
+.tbl .status{font-size:14px}
 
 .mid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:0}
 .pile-row{display:flex;align-items:flex-end;justify-content:center;gap:22px}
@@ -111,10 +130,16 @@ input.code{text-transform:uppercase;letter-spacing:.25em;text-align:center;font-
 .me .head{display:flex;align-items:center;gap:8px;font-weight:800}
 .actions{display:flex;gap:8px;flex-wrap:wrap}
 .actions .btn{flex:1 1 40%}
+.mid-acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;width:100%;max-width:440px}
+.mid-acts .btn{flex:1 1 auto;min-width:0;padding:9px 12px;font-size:14px;border-radius:10px}
+.tbl .mid-acts .btn{flex:1 1 45%;padding:8px 8px;font-size:13px}
 
 /* ---- cards ---- */
 .card{--w:56px;--r:calc(var(--w)*.11);--hue:var(--ink);width:var(--w);aspect-ratio:5/7;border-radius:var(--r);position:relative;display:flex;align-items:center;justify-content:center;font-size:calc(var(--w)*.4);flex:0 0 auto;user-select:none}
 .c-xs{--w:30px}.c-sm{--w:44px}.c-md{--w:min(19vw,74px)}.c-lg{--w:min(24vw,92px)}
+.pile .card,.pile .empty-pile{--w:min(21vw,84px)}
+.drawn-zone .card{--w:min(26vw,104px)}
+.me .hand .card{--w:min(15vw,60px)}
 .card.back{background:radial-gradient(circle at 50% 50%,transparent 30%,var(--table) 31% 33%,transparent 34%),repeating-linear-gradient(45deg,var(--rail) 0 3px,var(--table-2) 3px 7px),repeating-linear-gradient(-45deg,transparent 0 3px,color-mix(in srgb,var(--brass),transparent 82%) 3px 4px);background-blend-mode:normal;border:2px solid var(--brass-dk);box-shadow:0 2px 6px var(--shadow),inset 0 0 0 calc(var(--w)*.05) var(--table-2),inset 0 0 0 calc(var(--w)*.065) var(--brass-dk)}
 .card.back .bk{font-family:var(--font-display);color:var(--brass-2);font-size:.5em;line-height:1;transform:rotate(-28deg);text-shadow:0 1px 0 var(--brass-dk),0 0 6px var(--table);background:var(--table-2);padding:.12em .28em;border-radius:.3em;border:1px solid var(--brass-dk)}
 .screw{aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--brass-2),var(--brass) 55%,var(--brass-dk));position:relative;box-shadow:inset 0 -2px 3px var(--shadow),0 1px 2px var(--shadow)}
@@ -163,7 +188,7 @@ input.code{text-transform:uppercase;letter-spacing:.25em;text-align:center;font-
 .slot.flash .card{animation:flash 1.6s ease-out}
 .slot .hole{display:block;width:var(--w);aspect-ratio:5/7;border:2px dashed var(--line);border-radius:6px;opacity:.5}
 .slot.empty{--w:38px}
-.me .slot.empty{--w:min(19vw,74px)}
+.me .slot.empty{--w:min(15vw,60px)}
 @keyframes pulse{50%{outline-color:transparent}}
 @keyframes flash{0%{box-shadow:0 0 0 6px var(--brass-2)}100%{box-shadow:0 0 0 0 transparent}}
 .flyer{position:fixed;left:0;top:0;z-index:40;pointer-events:none;transform-origin:0 0;will-change:transform}
@@ -221,6 +246,7 @@ const FIREBASE_CONFIG = {
 
 /* ---------- house rules ---------- */
 const RULES={handSize:4,peekSlots:[0,1],minLaps:3,revealMs:3500,maxPlayers:6};
+const BOT_NAMES=['روبو','بوتي','سمسم','زعتر','فلفل'];
 const CMD_NAME={peekSelf:'شوف ورقتك',peekOther:'شوف ورقة غيرك',swap:'خد وهات',take:'خد بس',heel:'كعب داير',basra:'بصرة',seeswap:'See & Swap',free:'على كيفك'};
 const FREE_CHOICES=['peekSelf','peekOther','swap','take','heel','basra','seeswap'];
 const CMD_HELP={
@@ -339,9 +365,9 @@ const ACT={
     }
     if(!s.players.some(p=>p.id===me))return{};
     s.left=s.left||{};s.left[me]=true;addLog(s,`${pname(s,me)} طلع من اللعبة`,me);
-    if(s.hostId===me){const a=active(s);if(a.length)s.hostId=a[0].id}
+    if(s.hostId===me){const a=active(s).filter(p=>!p.bot);if(a.length)s.hostId=a[0].id}
     if(s.status==='playing'||s.status==='peek'){
-      if(active(s).length<2){s.rounds=s.round;finishRound(s);return{}}
+      if(active(s).length<2||!active(s).some(p=>!p.bot)){s.rounds=s.round;finishRound(s);return{}}
       if(s.status==='peek'&&active(s).every(p=>s.ready[p.id]))s.status='playing';
       if(s.status==='playing'&&s.players[s.turn].id===me){if(s.drawn!=null)s.discard.push(s.drawn);endTurn(s)}
     }
@@ -350,6 +376,16 @@ const ACT={
   endGame(s,me){
     if(s.hostId!==me)return E('صاحب اللعبة بس ينهيها');
     s.status='over';s.result=null;s.drawn=null;s.action=null;addLog(s,'صاحب اللعبة أنهى اللعبة',me);return{};
+  },
+  addBot(s,me){
+    if(s.hostId!==me||s.status!=='lobby')return E('');
+    if(s.players.length>=RULES.maxPlayers)return E('اللعبة ممتلئة');
+    const n=s.players.filter(p=>p.bot).length;
+    s.players.push({id:'bot'+Date.now().toString(36)+n,name:BOT_NAMES[n%BOT_NAMES.length],g:'m',bot:true});return{};
+  },
+  removeBot(s,me,{id}){
+    if(s.hostId!==me||s.status!=='lobby')return E('');
+    s.players=s.players.filter(p=>!(p.bot&&p.id===id));return{};
   },
   rounds(s,me,{n}){if(s.hostId!==me||s.status!=='lobby')return E('');s.rounds=n;return{}},
   start(s,me){
@@ -559,34 +595,35 @@ let toastT;
 function toast(m){if(!m)return;const t=document.getElementById('toast');t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2800)}
 
 /* Moves apply on this phone first (instant), then sync to the shared table in order. */
-const OPTIMISTIC=new Set(['draw','takeFloor','keep','discardDrawn','skipAction','resolve','throwCard','screw','ready']);
+const OPTIMISTIC=new Set(['draw','takeFloor','keep','discardDrawn','skipAction','resolve','throwCard','screw','ready','chooseCmd']);
 let chain=Promise.resolve();
 ui.pending=0;
-function commit(name,args){
+function commit(name,args,actor){
+  actor=actor||me;
   if(!gameRef)return Promise.resolve(null);
   if(S&&OPTIMISTIC.has(name)&&ui.pending<4){
     const t=JSON.parse(JSON.stringify(S));
-    const res=ACT[name](t,me,args||{});
+    const res=ACT[name](t,actor,args||{});
     if(res.err!==undefined){toast(res.err);return Promise.resolve(null)}
     t.rev=(S.rev||0)+1;t._local=true;
     const prev=S;S=t;onState(prev);
     ui.pending++;
-    chain=chain.then(()=>netCommit(name,args)).finally(()=>{ui.pending--});
+    chain=chain.then(()=>netCommit(name,args,actor)).finally(()=>{ui.pending--});
     return Promise.resolve(res);
   }
   if(ui.busy)return Promise.resolve(null);
   ui.busy=true;
-  const p=chain.then(()=>netCommit(name,args)).finally(()=>{ui.busy=false});
+  const p=chain.then(()=>netCommit(name,args,actor)).finally(()=>{ui.busy=false});
   chain=p;
   return p;
 }
-async function netCommit(name,args){
+async function netCommit(name,args,actor){
   let res=null,errMsg=null;
   try{
     const r=await runTransaction(gameRef,cur=>{
       if(cur===null)return null;
       const s=JSON.parse(cur.s);delete s._local;
-      res=ACT[name](s,me,args||{});
+      res=ACT[name](s,actor,args||{});
       if(res.err!==undefined){errMsg=res.err;return}
       errMsg=null;s.rev=(cur.rev||0)+1;s.updated=Date.now();
       return {s:JSON.stringify(s),rev:s.rev};
@@ -613,7 +650,7 @@ function watch(c){
     adopt(d);
   },()=>toast('انقطع الاتصال، حدّث الصفحة'));
 }
-function leaveLocal(){unsub?.();unsub=null;S=null;gameRef=null;code=null;lsSet('skrew.code',null);hideZoom();closeSheet();renderHome()}
+function leaveLocal(){unsub?.();unsub=null;S=null;gameRef=null;code=null;lsSet('skrew.code',null);zoomCb=null;hideZoom();closeSheet();renderHome()}
 
 function onState(prev){
   const s=S;
@@ -634,6 +671,7 @@ function onState(prev){
   if(s.status==='playing'){const vk=`${s.round}-${s.turnsTaken}`;if(vk!==ui.voiceKey){ui.voiceKey=vk;const p=s.players[s.turn];if(p)speak(`دور ${p.name}`)}}
   if(mine&&!ui.wasMyTurn){setTimeout(()=>play('turn'),newFx?300:0);try{navigator.vibrate?.(120)}catch(e){}}
   ui.wasMyTurn=mine;
+  botTick();
 }
 function reveal(ids){const now=Date.now(),until=now+RULES.revealMs;ids.forEach(id=>{ui.reveals[id]=until;ui.revealAt[id]=now});setTimeout(render,RULES.revealMs+60)}
 const revealed=id=>(ui.reveals[id]||0)>Date.now();
@@ -671,7 +709,7 @@ function animate(f,froms){
       {transform:'translate(0,0) scale(1) rotate(0deg)'},
       {transform:`translate(${dx*.5}px,${dy*.5-lift}px) scale(${(1+sc)/2*1.08}) rotate(${dx>0?6:-6}deg)`,offset:.5},
       {transform:`translate(${dx}px,${dy}px) scale(${sc}) rotate(0deg)`}
-    ],{duration:320,delay:m.delay||0,easing:'cubic-bezier(.25,.7,.3,1)',fill:'both'});
+    ],{duration:420,delay:m.delay||0,easing:'cubic-bezier(.25,.7,.3,1)',fill:'both'});
     const done=()=>{g.remove();if(toEl.isConnected)toEl.style.visibility=''};
     anim.finished.then(done,done);
   });
@@ -782,6 +820,7 @@ function renderHome(msg){
       <input id="nm" type="text" maxlength="14" value="${esc(nm)}" placeholder="مثلاً: آلاء" autocomplete="nickname">
       <div class="seg" role="group" aria-label="ولد أو بنت"><button class="btn sm ${myG()==='f'?'on':''}" data-a="setG" data-g="f">بنت</button><button class="btn sm ${myG()==='m'?'on':''}" data-a="setG" data-g="m">ولد</button></div>
       <button class="btn primary" data-a="create" ${ui.creating?'disabled':''}>لعبة جديدة</button>
+      <button class="btn" data-a="createBots" ${ui.creating?'disabled':''}>العب ضد الكمبيوتر</button>
     </div>
     <div class="panel">
       <label for="jc">عندك رمز من صاحبك؟</label>
@@ -805,7 +844,8 @@ function renderLobby(s){
     </div>
     <div class="panel">
       <label>اللاعبين (${s.players.length}/${RULES.maxPlayers})</label>
-      <ul class="plist">${s.players.map(p=>`<li><span class="grow">${esc(p.name)}</span>${p.id===s.hostId?'<span class="chip gold">صاحب اللعبة</span>':''}${p.id===me?'<span class="chip">أنت</span>':''}</li>`).join('')}</ul>
+      <ul class="plist">${s.players.map(p=>`<li><span class="grow">${esc(p.name)}</span>${p.bot?'<span class="chip">كمبيوتر</span>':''}${p.id===s.hostId?'<span class="chip gold">صاحب اللعبة</span>':''}${p.id===me?'<span class="chip">أنت</span>':''}${p.bot&&host?`<button class="btn sm ghost" data-a="removeBot" data-id="${esc(p.id)}" aria-label="شيل ${esc(p.name)}">✕</button>`:''}</li>`).join('')}</ul>
+      ${host&&s.players.length<RULES.maxPlayers?'<button class="btn" data-a="addBot">+ أضف كمبيوتر</button>':''}
       <label>عدد الجولات</label>
       <div class="seg">${[3,5,7].map(n=>`<button class="btn sm ${s.rounds===n?'on':''}" data-a="rounds" data-n="${n}" ${host?'':'disabled'}>${n}</button>`).join('')}</div>
       ${host?`<button class="btn primary" data-a="start" ${s.players.length<2?'disabled':''}>ابدأ اللعب</button>${s.players.length<2?'<p class="note">بانتظار لاعب ثاني على الأقل…</p>':''}`:'<p class="note">بانتظار صاحب اللعبة يبدأ…</p>'}
@@ -863,11 +903,13 @@ function renderGame(s){
   const deckCan=mine&&s.phase==='draw'&&ui.mode!=='throw'&&canWrite&&!out;
   const floorCan=canTakeFloor(s)&&!out;
 
-  const oppsHTML=opps.map(p=>`<div class="opp ${s.status==='playing'&&cur.id===p.id?'turn':''} ${gone(s,p.id)?'gone':''}">
+  const oppHTML=(p,v)=>`<div class="opp ${v} ${s.status==='playing'&&cur.id===p.id?'turn':''} ${gone(s,p.id)?'gone':''}">
       <div class="who"><div class="nm">${esc(p.name)}</div><div class="sc">${totalScore(s,p.id)} نقطة</div>
-      ${gone(s,p.id)?'<span class="chip">طلع</span>':s.screwBy===p.id?`<span class="chip red">${said(s,p.id)} سكرو</span>`:s.status==='peek'&&s.ready[p.id]?'<span class="chip green">جاهز</span>':''}</div>
-      <div class="hand">${s.hands[p.id].map((_,i)=>slotHTML(s,p.id,i,'c-op')).join('')}</div>
-    </div>`).join('');
+      ${p.bot?'<span class="chip">كمبيوتر</span> ':''}${gone(s,p.id)?'<span class="chip">طلع</span>':s.screwBy===p.id?`<span class="chip red">${said(s,p.id)} سكرو</span>`:s.status==='peek'&&s.ready[p.id]?'<span class="chip green">جاهز</span>':''}</div>
+      <div class="hand">${s.hands[p.id].map((_,i)=>slotHTML(s,p.id,i,v==='side'?'c-side':v==='top'?'c-xs':'c-op')).join('')}</div>
+    </div>`;
+  const tbl=opps.length>=2;
+  const st=!tbl?{top:opps,r:[],l:[]}:opps.length===2?{top:[],r:[opps[0]],l:[opps[1]]}:{r:[opps[0]],top:opps.slice(1,opps.length-1),l:[opps[opps.length-1]]};
   const myHand=meP?s.hands[me].map((_,i)=>slotHTML(s,me,i,'c-md')).join(''):'<p class="note">أنت تتفرج على هذي اللعبة</p>';
 
   let acts='';
@@ -907,7 +949,7 @@ function renderGame(s){
   app.innerHTML=`
     <div class="top"><span class="ttl">سكرو</span><span class="meta">جولة ${s.round} من ${s.rounds} · ${esc(s.code)}</span><span class="grow"></span>
       ${soundBtn()}<button class="btn sm ghost" data-a="rules">القواعد</button><button class="btn sm ghost" data-a="exit">خروج</button></div>
-    <div class="opps">${oppsHTML}</div>
+    ${tbl?`<div class="table tbl"><div class="seat-top">${st.top.map(p=>oppHTML(p,'top')).join('')}</div><div class="seat-r">${st.r.map(p=>oppHTML(p,'side')).join('')}</div><div class="seat-l">${st.l.map(p=>oppHTML(p,'side')).join('')}</div>`:`<div class="opps">${st.top.map(p=>oppHTML(p,'')).join('')}</div>`}
     <div class="mid">
       ${s.screwBy&&s.status==='playing'?`<span class="banner">${esc(pname(s,s.screwBy))} ${said(s,s.screwBy)} سكرو! آخر دور</span>`:''}
       <div class="pile-row">
@@ -916,13 +958,14 @@ function renderGame(s){
         <div class="pile"><button class="slot${floorCan?' can':''}" data-a="takeFloor" data-zone="discard" ${top!=null?`data-face="${top}" data-label="ورقة الأرض"`:''} aria-label="الأرض"><div class="stack">${top!=null?faceHTML(top,'c-md'):'<div class="card c-md empty-pile"></div>'}</div></button><span>الأرض</span></div>
       </div>
       <div class="status">${statusText(s)}</div>
+      ${acts?`<div class="mid-acts">${acts}</div>`:''}
       <div class="log">${lastLog?esc(lastLog.m):''}</div>
     </div>
+    ${tbl?'</div>':''}
     <div class="me ${mine?'turn':''}">
       <div class="head"><span>${meP?esc(meP.name):''}</span>${meP?`<span class="chip">${totalScore(s,me)} نقطة</span>`:''}${s.screwBy===me?'<span class="chip red">قلت سكرو</span>':''}</div>
       <div class="hand">${myHand}</div>
       ${meP&&!out&&s.status==='playing'&&s.screwBy!==me&&s.discard.length&&!myPicksBusy(s)?'<div class="hint">اضغط على ورقتك تحرقها لو نفس ورقة الأرض</div>':''}
-      ${acts?`<div class="actions">${acts}</div>`:''}
       ${out?`<button class="btn primary" data-a="rejoin">ارجع للعبة</button>`:''}
     </div>`;
 
@@ -993,6 +1036,8 @@ function rulesHTML(){
   const ex=(t,l)=>{const id=DECK.indexOf(t);return `<div>${faceHTML(id,'c-sm')}<span>${l}</span></div>`};
   return `<h2>قواعد سكرو</h2>
   <p>الهدف: أقل مجموع نقاط في آخر الجولة.</p>
+  <h3>الكمبيوتر</h3>
+  <p>صاحب اللعبة يقدر يضيف لاعبين كمبيوتر من غرفة الانتظار، أو يضغط "العب ضد الكمبيوتر" من البداية. الكمبيوتر يلعب من جوال صاحب اللعبة، فلازم يبقى فاتح.</p>
   <h3>البداية</h3>
   <ul><li>كل لاعب ياخذ ${RULES.handSize} أوراق مقلوبة.</li><li>تشوف ورقتك 1 و 2 مرة وحدة، واحفظها.</li></ul>
   <h3>دورك</h3>
@@ -1018,14 +1063,108 @@ function rulesHTML(){
 }
 
 /* ---------- events ---------- */
+/* ---------- computer players (run on the host's phone) ---------- */
+const botMem={};
+function mem(id){return botMem[id]||(botMem[id]={mine:{},opp:{},round:0})}
+function cleanMem(s,id){
+  const m=mem(id);
+  if(m.round!==s.round){m.mine={};m.opp={};m.round=s.round}
+  for(const k in m.mine)if(s.hands[id]?.[k]!==m.mine[k])delete m.mine[k];
+  for(const k in m.opp){const [p,i]=k.split('|');if(s.hands[p]?.[+i]!==m.opp[k])delete m.opp[k]}
+  return m;
+}
+function botThiefGuess(s,id,m){
+  const th=DECK.indexOf('thief');
+  if(Object.values(m.mine).includes(th))return{k:'p',p:id};
+  for(const k in m.opp)if(m.opp[k]===th)return{k:'p',p:k.split('|')[0]};
+  if(s.discard.includes(th))return{k:'floor'};
+  return{k:'deck'};
+}
+let botTimer=null,botKey='';
+function botTick(){
+  const s=S;if(!s||s.hostId!==me)return;
+  if(s.status==='peek'){
+    const b=s.players.find(p=>p.bot&&!s.ready[p.id]&&!gone(s,p.id));if(!b)return;
+    const k='peek-'+s.round+'-'+b.id;if(botKey===k)return;botKey=k;
+    setTimeout(()=>{if(!S||S.status!=='peek')return;const m=mem(b.id);m.mine={};m.opp={};m.round=S.round;RULES.peekSlots.forEach(i=>{if(S.hands[b.id][i]!=null)m.mine[i]=S.hands[b.id][i]});commit('ready',{},b.id)},400);
+    return;
+  }
+  if(s.status!=='playing')return;
+  const cur=s.players[s.turn];if(!cur||!cur.bot)return;
+  const k=`${s.round}-${s.turnsTaken}-${s.phase}-${s.action?.type||''}-${s.rev}`;if(botKey===k)return;botKey=k;
+  clearTimeout(botTimer);botTimer=setTimeout(()=>botStep(cur.id),(s.phase==='draw'?2000:1400)+Math.random()*600);
+}
+function botStep(id){
+  const s=S;if(!s||s.status!=='playing'||s.hostId!==me||s.players[s.turn]?.id!==id)return;
+  const m=cleanMem(s,id),hand=s.hands[id];
+  const val=c=>info(T(c)).v;
+  const slots=hand.map((c,i)=>c!=null?i:-1).filter(i=>i>=0);
+  const known=slots.filter(i=>m.mine[i]!=null),unknown=slots.filter(i=>m.mine[i]==null);
+  let w={slot:-1,v:-99};known.forEach(i=>{const v=val(m.mine[i]);if(v>w.v)w={slot:i,v}});
+  const opps=active(s).filter(p=>p.id!==id&&s.hands[p.id].some(c=>c!=null));
+  const free=opps.filter(p=>s.screwBy!==p.id);
+  const top=s.discard[s.discard.length-1];
+  const act=(n,a)=>commit(n,a||{},id);
+  const rnd=a=>a[Math.floor(Math.random()*a.length)];
+  const slotsOf=pid=>s.hands[pid].map((c,i)=>c!=null?i:-1).filter(i=>i>=0);
+  if(s.phase==='draw'){
+    const est=known.reduce((a,i)=>a+val(m.mine[i]),0)+unknown.length*5;
+    if(!s.screwBy&&lapsLeft(s)===0&&((unknown.length===0&&est<=7)||(unknown.length===1&&est<=6)))return act('screw',{guess:botThiefGuess(s,id,m)});
+    if(top!=null&&s.screwBy!==id){const i=known.find(i=>T(m.mine[i])===T(top));if(i!=null)return act('throwCard',{slot:i})}
+    if(top!=null){const f=info(T(top));if(!f.must&&!f.cmd&&((w.slot>=0&&f.v<w.v-1)||(f.v<=1&&unknown.length)))return act('takeFloor')}
+    return act('draw');
+  }
+  if(s.phase==='drawn'){
+    const c=s.drawn,f=info(T(c));
+    if(s.drawnFrom==='discard'){const slot=(w.slot>=0&&(f.v<w.v||!unknown.length))?w.slot:(unknown.length?unknown[0]:slots[0]);m.mine[slot]=c;return act('keep',{slot})}
+    if(f.must||f.cmd)return act('discardDrawn');
+    if(w.slot>=0&&f.v<w.v){m.mine[w.slot]=c;return act('keep',{slot:w.slot})}
+    if(unknown.length&&f.v<=3){m.mine[unknown[0]]=c;return act('keep',{slot:unknown[0]})}
+    return act('discardDrawn');
+  }
+  if(s.phase!=='action')return;
+  const t=s.action.type;
+  if(t==='free')return act('chooseCmd',{type:unknown.length?'peekSelf':(w.v>=6?'basra':'peekOther')});
+  if(t==='peekSelf'){if(!unknown.length)return act('skipAction');const i=unknown[0];m.mine[i]=hand[i];return act('resolve',{sel:[{p:id,s:i}]})}
+  if(t==='peekOther'){
+    const pool=[];opps.forEach(p=>slotsOf(p.id).forEach(i=>{if(m.opp[p.id+'|'+i]==null)pool.push({p:p.id,s:i})}));
+    if(!pool.length)return act('skipAction');const o=rnd(pool);m.opp[o.p+'|'+o.s]=s.hands[o.p][o.s];return act('resolve',{sel:[o]});
+  }
+  if(t==='swap'){
+    if(w.slot<0||w.v<6||!free.length)return act('skipAction');
+    let o=null,ov=99;for(const k in m.opp){const [p,i]=k.split('|');if(s.screwBy===p)continue;const v=val(m.opp[k]);if(v<ov){ov=v;o={p,s:+i}}}
+    if(!o||ov>=w.v){const p=rnd(free);o={p:p.id,s:rnd(slotsOf(p.id))};ov=null}
+    const kn=m.opp[o.p+'|'+o.s],mineC=m.mine[w.slot];delete m.mine[w.slot];if(kn!=null)m.mine[w.slot]=kn;m.opp[o.p+'|'+o.s]=mineC;
+    return act('resolve',{sel:[{p:id,s:w.slot},o]});
+  }
+  if(t==='take'){if(w.slot<0||w.v<5||!free.length)return act('skipAction');const p=rnd(free);delete m.mine[w.slot];return act('resolve',{sel:[{p:id,s:w.slot}],to:p.id})}
+  if(t==='heel'){
+    if(unknown.length>=2){const [a,b]=unknown;m.mine[a]=hand[a];m.mine[b]=hand[b];return act('resolve',{sel:[{p:id,s:a},{p:id,s:b}]})}
+    if(!opps.length)return act('skipAction');
+    const sel=opps.map(p=>{const i=rnd(slotsOf(p.id));m.opp[p.id+'|'+i]=s.hands[p.id][i];return{p:p.id,s:i}});return act('resolve',{sel});
+  }
+  if(t==='basra'){const i=(w.slot>=0&&w.v>=4)?w.slot:unknown[0];if(i==null)return act('skipAction');delete m.mine[i];return act('resolve',{sel:[{p:id,s:i}]})}
+  if(t==='seeswap'){
+    if(!opps.length)return act('skipAction');
+    const sel=opps.map(p=>({p:p.id,s:rnd(slotsOf(p.id))}));sel.forEach(c=>m.opp[c.p+'|'+c.s]=s.hands[c.p][c.s]);
+    let best=null;sel.forEach(c=>{if(s.screwBy===c.p)return;const v=val(s.hands[c.p][c.s]);if(!best||v<best.v)best={c,v}});
+    if(best&&w.slot>=0&&best.v<w.v){const theirs=s.hands[best.c.p][best.c.s];m.opp[best.c.p+'|'+best.c.s]=m.mine[w.slot];m.mine[w.slot]=theirs;return act('resolve',{sel,mode:'mine',a:best.c,mine:w.slot})}
+    return act('resolve',{sel,mode:null});
+  }
+  return act('skipAction');
+}
+
 /* ---------- zoom ---------- */
 const zoomEl=document.getElementById('zoom');let zoomT;
-function showZoom(ids,label,ms){
+let zoomCb=null;
+function showZoom(ids,label,ms,onClose){
+  if(zoomCb){const cb=zoomCb;zoomCb=null;cb()}
+  zoomCb=onClose||null;
   const sz=ids.length>1?'c-xl2':'c-xl';
   zoomEl.innerHTML=`<div class="lbl">${esc(label||'')}</div><div class="cards">${ids.map(id=>faceHTML(id,sz)).join('')}</div><div class="hint">اضغط في أي مكان للإغلاق</div>`;
   zoomEl.hidden=false;clearTimeout(zoomT);if(ms)zoomT=setTimeout(hideZoom,ms);
 }
-function hideZoom(){zoomEl.hidden=true;clearTimeout(zoomT)}
+function hideZoom(){zoomEl.hidden=true;clearTimeout(zoomT);const cb=zoomCb;zoomCb=null;if(cb)cb()}
 function zoomFace(el){const id=+el.dataset.face;if(Number.isFinite(id))showZoom([id],el.dataset.label||'',0)}
 let lpT=null;
 document.addEventListener('pointerdown',e=>{
@@ -1073,7 +1212,10 @@ document.addEventListener('click',async e=>{
   if(!b||b.disabled){const f=e.target.closest('[data-face]');if(f)zoomFace(f);return}
   const a=b.dataset.a;
   switch(a){
-    case 'create':return createGame();
+    case 'create':return createGame(0);
+    case 'createBots':return createGame(2);
+    case 'addBot':return commit('addBot');
+    case 'removeBot':return commit('removeBot',{id:b.dataset.id});
     case 'join':return joinGame();
     case 'rules':return openSheet('rules',rulesHTML());
     case 'exit':return openSheet('exit',exitHTML(S));
@@ -1124,7 +1266,7 @@ async function onCard(pid,i){
   if(s.phase!=='action')return;
   const t=s.action.type,cell={p:pid,s:i},id=s.hands[pid][i];
   const lbl=c=>c.p===me?`ورقتك رقم ${c.s+1}`:`ورقة ${pname(s,c.p)} رقم ${c.s+1}`;
-  if(t==='peekSelf'||t==='peekOther'){const r=await commit('resolve',{sel:[cell]});if(r){reveal([id]);render();showZoom([id],lbl(cell),RULES.revealMs)}return}
+  if(t==='peekSelf'||t==='peekOther'){reveal([id]);render();play('flip');showZoom([id],lbl(cell),RULES.revealMs,()=>commit('resolve',{sel:[cell]}));return}
   if(t==='basra')return commit('resolve',{sel:[cell]});
   if(t==='swap'){ui.sel=ui.sel.filter(c=>(c.p===me)!==(pid===me));ui.sel.push(cell);return render()}
   if(t==='heel'){
@@ -1157,22 +1299,22 @@ async function onCard(pid,i){
 async function confirmAction(){
   const s=S,t=s.action?.type;
   const ids=ui.sel.map(c=>s.hands[c.p][c.s]);
-  const r=await commit('resolve',{sel:ui.sel});
-  if(r&&t==='heel'){reveal(ids);render();showZoom(ids,'كعب داير',RULES.revealMs+1000)}
+  if(t==='heel'){const sel=ui.sel.slice();reveal(ids);render();play('flip');showZoom(ids,'كعب داير',RULES.revealMs+1000,()=>commit('resolve',{sel}));return}
+  await commit('resolve',{sel:ui.sel});
 }
 
 /* ---------- home actions ---------- */
 function myG(){return lsGet('skrew.g')==='m'?'m':(lsGet('skrew.g')==='f'?'f':'')}
 function readName(){return (document.getElementById('nm')?.value||lsGet('skrew.name')||'').trim().slice(0,14)}
 const CODE_CH='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
-async function createGame(){
+async function createGame(nBots){
   if(ui.creating)return;
   const name=readName();if(!name){renderHome('اكتب اسمك أول');return}
   if(!myG()){lsSet('skrew.name',name);renderHome('اختر بنت أو ولد');return}
   lsSet('skrew.name',name);ui.creating=true;
   try{
     let c;for(let i=0;i<6;i++){c=Array.from({length:4},()=>CODE_CH[Math.floor(Math.random()*CODE_CH.length)]).join('');const sn=await get(ref(db,'games/'+c));if(!sn.exists())break}
-    const s={code:c,hostId:me,status:'lobby',players:[{id:me,name,g:myG()||'m'}],rounds:5,round:0,scores:{},left:{},log:[],logSeq:0,rev:1,created:Date.now()};
+    const s={code:c,hostId:me,status:'lobby',players:[{id:me,name,g:myG()||'m'}].concat(Array.from({length:nBots||0},(_,n)=>({id:'bot'+Date.now().toString(36)+n,name:BOT_NAMES[n],g:'m',bot:true}))),rounds:5,round:0,scores:{},left:{},log:[],logSeq:0,rev:1,created:Date.now()};
     await set(ref(db,'games/'+c),{s:JSON.stringify(s),rev:1});watch(c);
   }catch(e){renderHome(String(e?.code||e?.message||'').toUpperCase().includes('PERMISSION')?'قاعدة البيانات رافضة الكتابة. تأكد من قواعد Firebase.':'ما قدرنا ننشئ اللعبة، تأكد من الإنترنت وجرّب مرة ثانية')}
   finally{ui.creating=false}
