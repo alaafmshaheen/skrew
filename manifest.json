@@ -1,1 +1,1 @@
-{"name": "سكرو", "short_name": "سكرو", "start_url": ".", "display": "standalone", "background_color": "#24151f", "theme_color": "#24151f", "dir": "rtl", "lang": "ar", "icons": [{"src": "icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}]}
+{"name": "سكرو", "short_name": "سكرو", "start_url": ".", "display": "standalone", "background_color": "#24151f", "theme_color": "#24151f", "dir": "rtl", "lang": "ar", "icons": [{"src":"app-icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}]}
