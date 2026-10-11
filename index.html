@@ -1,0 +1,1212 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#24151f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="سكرو">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<title>سكرو أونلاين</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lalezar&family=Tajawal:wght@400;500;700;800&display=swap">
+<style>
+html,body{margin:0}[hidden]{display:none!important}
+html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+
+/* Layout: one-screen card table. Opponents on top, deck and discard in the middle, your hand and controls at the bottom. Ahwa wood and brass, ivory cards. */
+:root{
+  color-scheme:dark;
+  --table:#24151f;
+  --table-2:#3b2233;
+  --rail:#4d2d42;
+  --line:#6b4560;
+  --fg:#f7ede4;
+  --muted:#cdb3c3;
+  --ivory:#f8f0df;
+  --ivory-2:#ece0c6;
+  --ink:#2a1a22;
+  --brass:#e2a83c;
+  --brass-2:#f6cf78;
+  --brass-dk:#9b6a1e;
+  --red:#c8402f;
+  --green:#2e8a5a;
+  --shadow:rgba(10,4,8,.55);
+  --font-display:'Lalezar','Tajawal',system-ui,sans-serif;
+  --font-body:'Tajawal',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+html,body{height:100%}
+body{background:radial-gradient(120% 80% at 50% 38%,var(--table-2),var(--table) 72%);background-color:var(--table);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5;-webkit-tap-highlight-color:transparent;overflow:hidden}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit}
+#app{height:100%;display:flex;flex-direction:column;padding-inline:16px;padding-block:10px;max-width:640px;margin-inline:auto;gap:10px}
+:focus-visible{outline:2px solid var(--brass-2);outline-offset:2px}
+
+.btn{appearance:none;border:0;border-radius:12px;padding:12px 16px;font-weight:800;font-size:16px;cursor:pointer;background:var(--rail);color:var(--fg);box-shadow:0 3px 0 var(--table),inset 0 1px 0 rgba(255,255,255,.08);transition:transform .08s}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--table)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:linear-gradient(var(--brass-2),var(--brass));color:var(--ink);box-shadow:0 3px 0 var(--brass-dk)}
+.btn.danger{background:var(--red);color:var(--ivory);box-shadow:0 3px 0 color-mix(in srgb,var(--red),black 40%)}
+.btn.ghost{background:transparent;box-shadow:none;border:1px solid var(--line);font-weight:700}
+.btn.sm{padding:7px 11px;font-size:14px;border-radius:10px}
+.btn.icon{padding:7px;display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px}
+.btn.icon svg{width:20px;height:20px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grow{flex:1}
+
+.home{flex:1;display:flex;flex-direction:column;justify-content:center;gap:22px;overflow:auto}
+.mark{font-family:var(--font-display);font-size:clamp(84px,30vw,150px);line-height:.9;color:var(--brass);text-align:center;text-shadow:0 5px 0 var(--brass-dk),0 12px 24px var(--shadow)}
+.mark small{display:block;font-family:var(--font-body);font-size:15px;font-weight:700;color:var(--muted);text-shadow:none;margin-top:14px}
+.panel{background:color-mix(in srgb,var(--rail),transparent 35%);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px}
+label{font-weight:700;font-size:14px;color:var(--muted)}
+input[type=text]{width:100%;background:var(--table);border:1px solid var(--line);border-radius:10px;padding:12px;color:var(--fg);font:inherit;font-size:17px}
+input.code{text-transform:uppercase;letter-spacing:.25em;text-align:center;font-weight:800;direction:ltr}
+.note{font-size:13px;color:var(--muted)}
+.err{color:#ffb1a5;font-weight:700;font-size:14px}
+
+.code-big{font-weight:800;font-size:44px;letter-spacing:.2em;direction:ltr;text-align:center;color:var(--brass-2);background:var(--table);border:2px dashed var(--brass-dk);border-radius:14px;padding:6px 10px;user-select:all}
+.plist{display:flex;flex-direction:column;gap:6px;list-style:none;margin:0;padding:0}
+.plist li{display:flex;align-items:center;gap:10px;background:var(--table);border-radius:10px;padding:10px 12px;font-weight:700}
+.chip{font-size:12px;font-weight:800;padding:2px 8px;border-radius:99px;background:var(--rail);color:var(--muted);white-space:nowrap}
+.chip.gold{background:var(--brass);color:var(--ink)}
+.chip.red{background:var(--red);color:var(--ivory)}
+.chip.green{background:var(--green);color:var(--ivory)}
+.seg{display:flex;gap:6px}
+.seg button{flex:1}
+.seg .on{background:var(--brass);color:var(--ink)}
+
+.top{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.top .ttl{font-family:var(--font-display);font-size:26px;color:var(--brass);line-height:1}
+.top .meta{font-size:12px;color:var(--muted);font-weight:700}
+
+.opps{display:flex;flex-direction:column;gap:8px}
+.opp{display:flex;align-items:center;gap:10px;background:color-mix(in srgb,var(--rail),transparent 45%);border:1px solid var(--line);border-radius:14px;padding:8px 10px;transition:border-color .2s,box-shadow .2s}
+.opp.turn,.me.turn{border-color:var(--brass);box-shadow:0 0 0 2px color-mix(in srgb,var(--brass),transparent 55%)}
+.opp.gone{opacity:.45}
+.opp .who{min-width:0;flex:0 0 auto;width:86px}
+.opp .nm{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.opp .sc{font-size:12px;color:var(--muted);font-weight:700}
+.opp .hand{display:flex;gap:5px;flex-wrap:wrap;flex:1;min-width:0}
+
+.mid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:0}
+.pile-row{display:flex;align-items:flex-end;justify-content:center;gap:22px}
+.pile{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--muted)}
+.pile .stack{position:relative;isolation:isolate}
+.pile .stack.deck::before,.pile .stack.deck::after{content:'';position:absolute;inset:0;border-radius:8px;background:var(--rail);border:1px solid var(--line);transform:translate(3px,3px);z-index:-1}
+.pile .stack.deck::after{transform:translate(6px,6px);z-index:-2}
+.drawn-zone{display:flex;flex-direction:column;align-items:center;gap:4px}
+.drawn-zone.swipe .card{touch-action:none;cursor:grab}
+.drawn-zone.swipe .card:active{cursor:grabbing}
+.status{min-height:44px;text-align:center;font-weight:800;font-size:16px;text-wrap:balance;padding-inline:8px}
+.status .sub{display:block;font-weight:500;font-size:13px;color:var(--muted)}
+.banner{background:var(--red);color:var(--ivory);font-weight:800;border-radius:10px;padding:4px 12px;font-size:14px}
+.log{font-size:12px;color:var(--muted);text-align:center;min-height:18px}
+
+.me{background:color-mix(in srgb,var(--rail),transparent 30%);border:1px solid var(--line);border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:10px;transition:border-color .2s,box-shadow .2s}
+.me .hand{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.me .head{display:flex;align-items:center;gap:8px;font-weight:800}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.actions .btn{flex:1 1 40%}
+
+/* ---- cards ---- */
+.card{--w:56px;--r:calc(var(--w)*.11);--hue:var(--ink);width:var(--w);aspect-ratio:5/7;border-radius:var(--r);position:relative;display:flex;align-items:center;justify-content:center;font-size:calc(var(--w)*.4);flex:0 0 auto;user-select:none}
+.c-xs{--w:30px}.c-sm{--w:44px}.c-md{--w:min(19vw,74px)}.c-lg{--w:min(24vw,92px)}
+.card.back{background:radial-gradient(circle at 50% 50%,transparent 30%,var(--table) 31% 33%,transparent 34%),repeating-linear-gradient(45deg,var(--rail) 0 3px,var(--table-2) 3px 7px),repeating-linear-gradient(-45deg,transparent 0 3px,color-mix(in srgb,var(--brass),transparent 82%) 3px 4px);background-blend-mode:normal;border:2px solid var(--brass-dk);box-shadow:0 2px 6px var(--shadow),inset 0 0 0 calc(var(--w)*.05) var(--table-2),inset 0 0 0 calc(var(--w)*.065) var(--brass-dk)}
+.card.back .bk{font-family:var(--font-display);color:var(--brass-2);font-size:.5em;line-height:1;transform:rotate(-28deg);text-shadow:0 1px 0 var(--brass-dk),0 0 6px var(--table);background:var(--table-2);padding:.12em .28em;border-radius:.3em;border:1px solid var(--brass-dk)}
+.screw{aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--brass-2),var(--brass) 55%,var(--brass-dk));position:relative;box-shadow:inset 0 -2px 3px var(--shadow),0 1px 2px var(--shadow)}
+.screw::before{content:'';position:absolute;left:16%;right:16%;top:44%;bottom:44%;background:var(--ink);border-radius:2px;transform:rotate(-32deg);opacity:.8}
+
+.card.face{background:#fffdf8;color:var(--hue);border:1px solid #e3d9c8;box-shadow:0 2px 6px var(--shadow);overflow:hidden;flex-direction:column}
+.card.face::before{content:'';position:absolute;inset:5%;border:max(1.5px,calc(var(--w)*.045)) solid var(--hue);border-radius:calc(var(--r)*.75);pointer-events:none}
+.card.face.solid::before{background:var(--hue)}
+.card .idx{position:absolute;top:9%;right:13%;font-family:var(--font-display);font-size:.36em;line-height:1;z-index:1}
+.card .idx.b{top:auto;right:auto;bottom:9%;left:13%;transform:rotate(180deg)}
+.card .ring{width:64%;aspect-ratio:1;border-radius:50%;border:max(1.5px,calc(var(--w)*.04)) solid var(--hue);display:flex;align-items:center;justify-content:center;z-index:1}
+.card .big{font-family:var(--font-display);font-size:1.45em;line-height:1;z-index:1}
+.card .ring .big{font-size:1.05em}
+.card .ttlc{font-family:var(--font-display);font-size:.34em;line-height:1.05;text-align:center;z-index:1;padding-inline:12%}
+.card .ico{width:46%;height:auto;z-index:1;display:block;margin-bottom:4%}
+.card .tag{position:absolute;bottom:12%;left:14%;right:14%;font-family:var(--font-body);font-size:max(7px,.16em);font-weight:800;line-height:1.2;text-align:center;color:var(--hue);z-index:1;white-space:nowrap;overflow:hidden}
+.card.solid .big,.card.solid .idx,.card.solid .ttlc{color:var(--on)}
+.card.k-wide .big{font-size:1.05em}
+.card.k-screw .screw{width:42%;z-index:1;margin-bottom:6%;background:radial-gradient(circle at 35% 30%,#fff,#eee6d8 60%,#b9ae9b)}
+.empty-pile{border:2px dashed var(--line);background:transparent;box-shadow:none}
+.card.flipin{animation:flipin .38s ease-out}
+@keyframes flipin{0%{transform:rotateY(90deg)}100%{transform:rotateY(0)}}
+.c-op{--w:38px}
+.c-xl{--w:min(62vw,240px)}.c-xl2{--w:min(38vw,170px)}
+.c-xs .idx,.c-xs .tag,.c-xs .ttlc,.c-op .idx,.c-op .tag,.c-op .ttlc{display:none}
+.c-xs .ico,.c-op .ico{width:62%;margin:0}
+.zoom{position:fixed;inset:0;z-index:35;background:color-mix(in srgb,var(--table),transparent 8%);backdrop-filter:blur(4px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:16px;text-align:center}
+.zoom .lbl{font-weight:800;font-size:18px}
+.zoom .cards{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;animation:zin .22s ease-out}
+.zoom .hint{font-size:13px;color:var(--muted)}
+@keyframes zin{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+.empty-pile{border:2px dashed var(--line);background:transparent;box-shadow:none}
+.card.flipin{animation:flipin .38s ease-out}
+@keyframes flipin{0%{transform:rotateY(90deg)}100%{transform:rotateY(0)}}
+
+.slot{appearance:none;background:none;border:0;padding:0;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:default;transition:transform .15s;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+[data-face]{cursor:zoom-in;-webkit-touch-callout:none}
+.slot .n{font-size:11px;font-weight:800;color:var(--muted);line-height:1}
+.slot.can,.slot.tt{cursor:pointer}
+.slot.tt:active .card{transform:translateY(-4px)}
+.hint{font-size:12px;color:var(--muted);text-align:center;margin-top:-4px}
+.slot.can .card{outline:2px solid var(--brass-2);outline-offset:2px;animation:pulse 1.4s ease-in-out infinite}
+.slot.sel{transform:translateY(-6px)}
+.slot.sel .card{outline:3px solid var(--brass);outline-offset:2px;animation:none}
+.slot.pk .card{outline:3px solid var(--red);outline-offset:2px;animation:none}
+.slot.flash .card{animation:flash 1.6s ease-out}
+.slot .hole{display:block;width:var(--w);aspect-ratio:5/7;border:2px dashed var(--line);border-radius:6px;opacity:.5}
+.slot.empty{--w:38px}
+.me .slot.empty{--w:min(19vw,74px)}
+@keyframes pulse{50%{outline-color:transparent}}
+@keyframes flash{0%{box-shadow:0 0 0 6px var(--brass-2)}100%{box-shadow:0 0 0 0 transparent}}
+.flyer{position:fixed;left:0;top:0;z-index:40;pointer-events:none;transform-origin:0 0;will-change:transform}
+.flyer .card{box-shadow:0 10px 24px var(--shadow)}
+@media (prefers-reduced-motion:reduce){.slot.can .card,.slot.flash .card,.card.flipin{animation:none}.slot,.btn{transition:none}}
+
+.sheet{position:fixed;inset:0;background:color-mix(in srgb,var(--table),transparent 15%);backdrop-filter:blur(3px);display:flex;align-items:flex-end;justify-content:center;z-index:20;padding-top:env(safe-area-inset-top,0px)}
+.sheet .box{background:var(--table-2);border:1px solid var(--line);border-radius:20px 20px 0 0;width:100%;max-width:640px;max-height:92%;overflow:auto;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
+.sheet h2{font-family:var(--font-display);font-weight:400;font-size:30px;margin:0;color:var(--brass);line-height:1.1}
+.sheet h3{margin:6px 0 0;font-size:16px;color:var(--brass-2)}
+.sheet p,.sheet li{margin:0;max-width:65ch}
+.sheet ul{margin:0;padding-inline-start:20px;display:flex;flex-direction:column;gap:4px}
+.res{display:flex;flex-direction:column;gap:8px}
+.res .r{background:var(--table);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.res .r .line{display:flex;align-items:center;gap:8px;font-weight:800;flex-wrap:wrap}
+.res .r .hand{display:flex;gap:4px;flex-wrap:wrap}
+.pts{font-family:var(--font-display);font-size:26px;line-height:1;font-variant-numeric:tabular-nums;color:var(--brass-2)}
+.board{overflow-x:auto}
+.board table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+.board th,.board td{padding:6px 8px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap}
+.board th:first-child,.board td:first-child{text-align:right}
+.cardref{display:flex;gap:10px;flex-wrap:wrap}
+.cardref div{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--muted);width:68px;text-align:center}
+
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--ivory);border:1px solid var(--brass-dk);padding:10px 16px;border-radius:12px;font-weight:700;z-index:30;max-width:calc(100% - 32px);text-align:center;box-shadow:0 6px 20px var(--shadow)}
+.center-msg{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:14px;text-align:center}
+</style>
+</head>
+<body>
+
+<div id="app" dir="rtl" lang="ar">
+  <div class="center-msg"><div class="mark">سكرو</div><p class="note">جاري التحميل…</p></div>
+</div>
+<div id="sheet" class="sheet" hidden><div class="box" id="sheetBox"></div></div>
+<div id="toast" class="toast" hidden></div>
+<div id="zoom" class="zoom" hidden></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, get, set, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+/* ===== Paste the Firebase web config between the braces ===== */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCiTMGBlUHWb0LRNS3nBxCvvL1M9KPGA0w",
+  authDomain: "screw-alaa.firebaseapp.com",
+  databaseURL: "https://screw-alaa-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "screw-alaa",
+  storageBucket: "screw-alaa.firebasestorage.app",
+  messagingSenderId: "698411872457",
+  appId: "1:698411872457:web:1fe321e3c9aceaebeb5d18"
+};
+/* ============================================================ */
+
+
+
+/* ---------- house rules ---------- */
+const RULES={handSize:4,peekSlots:[0,1],minLaps:3,revealMs:3500,maxPlayers:6};
+const CMD_NAME={peekSelf:'شوف ورقتك',peekOther:'شوف ورقة غيرك',swap:'خد وهات',take:'خد بس',heel:'كعب داير',basra:'بصرة',seeswap:'See & Swap',free:'على كيفك'};
+const FREE_CHOICES=['peekSelf','peekOther','swap','take','heel','basra','seeswap'];
+const CMD_HELP={
+  peekSelf:'اختر ورقة من أوراقك لتشوفها',
+  peekOther:'اختر ورقة من أوراق أي لاعب لتشوفها',
+  swap:'اختر ورقة من أوراقك وورقة من لاعب ثاني، وتتبدّل بدون ما أحد يشوف',
+  heel:'اختر ورقة من كل لاعب، أو ورقتين من أوراقك',
+  basra:'اختر ورقة من أوراقك وارمها بدون بديل',
+  seeswap:'اختر ورقة من كل لاعب وشوفها، وبعدها بدّل مع ورقة منك أو بينهم',
+  take:'اختر ورقة من أوراقك، وبعدها اضغط على ورقة اللاعب اللي تعطيه',
+  free:'اختر أي أمر تبغاه'
+};
+const DECK=[];
+for(let n=1;n<=10;n++)for(let k=0;k<4;k++)DECK.push('n'+n);
+[['swap',4],['basra',2],['heel',2],['take',1],['seeswap',1],['free',1],['thief',1],['p20',4],['gs',2],['rs',2],['m1',1]].forEach(([t,c])=>{for(let i=0;i<c;i++)DECK.push(t)});
+const SPECIAL={
+  p20:{v:20,kind:'p20',must:true},
+  m1:{v:-1,kind:'m1'},
+  gs:{v:0,kind:'gs',name:'سكرو أخضر'},
+  rs:{v:25,kind:'rs',name:'سكرو أحمر',must:true},
+  thief:{v:10,kind:'thief',name:'الحرامي'},
+  swap:{v:10,kind:'cmd',cmd:'swap'},
+  heel:{v:10,kind:'cmd',cmd:'heel'},
+  take:{v:10,kind:'cmd',cmd:'take'},
+  free:{v:10,kind:'cmd',cmd:'free'},
+  basra:{v:10,kind:'cmd',cmd:'basra'},
+  seeswap:{v:10,kind:'cmd',cmd:'seeswap'}
+};
+function info(t){
+  if(t[0]==='n'){const v=+t.slice(1);return{v,kind:v>=9?'other':v>=7?'self':'num',cmd:v>=9?'peekOther':v>=7?'peekSelf':null}}
+  return SPECIAL[t];
+}
+const T=id=>DECK[id];
+function cardName(id){const t=T(id),f=info(t);if(f.kind==='cmd')return CMD_NAME[f.cmd];if(f.name)return f.name;return t==='p20'?'+20':String(f.v)}
+
+/* ---------- pure game logic ---------- */
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const said=(s,id)=>(s.players.find(p=>p.id===id)?.g==='f'?'قالت':'قال');
+function pname(s,id){const p=s.players.find(p=>p.id===id);return p?p.name:'لاعب'}
+function addLog(s,m,by){s.logSeq=(s.logSeq||0)+1;s.log=(s.log||[]).concat({id:s.logSeq,m,by:by||null}).slice(-25)}
+function flash(s,cells){s.flash={seq:(s.flash?.seq||0)+1,cells}}
+/* fx: what the clients animate and hear. vis: 'all' face for everyone, 'by' face only for the actor, 'none' back for everyone */
+const L={deck:{k:'deck'},floor:{k:'discard'},drawn:{k:'drawn'},slot:(p,i)=>({k:'slot',p,s:i})};
+function fx(s,by,sound,moves){s.fx={seq:(s.fx?.seq||0)+1,by,sound,moves:moves||[]}}
+const gone=(s,id)=>!!(s.left&&s.left[id]);
+const active=s=>s.players.filter(p=>!gone(s,p.id));
+function popDeck(s){
+  if(!s.deck.length){
+    if(s.discard.length<2)return null;
+    const top=s.discard.pop();s.deck=shuffle(s.discard);s.discard=[top];
+    addLog(s,'خلصت الأوراق، انخلطت أوراق الأرض من جديد');
+  }
+  return s.deck.pop();
+}
+function lapsLeft(s){return Math.max(0,RULES.minLaps*active(s).length-s.turnsTaken)}
+function newRound(s){
+  s.deck=shuffle([...DECK.keys()]);s.discard=[];s.hands={};
+  s.players.forEach(p=>{s.hands[p.id]=[];for(let i=0;i<RULES.handSize;i++)s.hands[p.id].push(s.deck.pop())});
+  s.status='peek';s.ready={};s.turnsTaken=0;
+  s.turn=(s.round-1)%s.players.length;
+  for(let k=0;k<s.players.length&&gone(s,s.players[s.turn].id);k++)s.turn=(s.turn+1)%s.players.length;
+  s.phase='draw';s.drawn=null;s.drawnFrom=null;s.action=null;s.screwBy=null;s.thiefGuess=null;s.result=null;s.flash=null;
+  fx(s,null,'shuffle');addLog(s,`بدأت الجولة ${s.round}`);
+}
+function handTotal(s,pid){return s.hands[pid].filter(c=>c!=null).reduce((a,c)=>a+info(T(c)).v,0)}
+function thiefWhere(s){
+  const id=DECK.indexOf('thief');
+  for(const p of s.players)if((s.hands[p.id]||[]).includes(id))return{k:'p',p:p.id};
+  if(s.discard.includes(id))return{k:'floor'};
+  return{k:'deck'};
+}
+const sameWhere=(a,b)=>!!a&&!!b&&a.k===b.k&&(a.k!=='p'||a.p===b.p);
+function whereTxt(s,w){if(!w)return'';if(w.k==='floor')return'الأرض';if(w.k==='deck')return'الكومة';return'مع '+pname(s,w.p)}
+function finishRound(s){
+  const totals={};s.players.forEach(p=>totals[p.id]=handTotal(s,p.id));
+  const inPlay=active(s).map(p=>totals[p.id]);
+  const min=Math.min(...(inPlay.length?inPlay:Object.values(totals)));const pts={};
+  const where=thiefWhere(s),guess=s.thiefGuess||null,caught=sameWhere(guess,where);
+  s.players.forEach(p=>{
+    const t=totals[p.id];let x=t;
+    const holdsThief=where.k==='p'&&where.p===p.id;
+    if(p.id===s.screwBy&&!caught&&!holdsThief)x+=10;
+    pts[p.id]=x;(s.scores[p.id]=s.scores[p.id]||[]).push(x);
+  });
+  const penalty=!!s.screwBy&&!caught&&!(where.k==='p'&&where.p===s.screwBy);
+  s.result={totals,pts,caller:s.screwBy,min,thief:s.screwBy?{where,guess,caught,penalty}:null};
+  s.status=s.round>=s.rounds?'over':'reveal';s.drawn=null;s.drawnFrom=null;s.action=null;
+  fx(s,null,'win');addLog(s,`انتهت الجولة ${s.round}`);
+}
+function endTurn(s){
+  s.drawn=null;s.drawnFrom=null;s.phase='draw';s.action=null;s.turnsTaken++;
+  const n=s.players.length;
+  for(let k=1;k<=n;k++){
+    const idx=(s.turn+k)%n,pid=s.players[idx].id;
+    if(s.screwBy&&pid===s.screwBy){finishRound(s);return}
+    if(!gone(s,pid)){s.turn=idx;return}
+  }
+  finishRound(s);
+}
+const isTurn=(s,me)=>s.status==='playing'&&s.players[s.turn]?.id===me;
+const has=(s,p,i)=>!!s.hands[p]&&s.hands[p][i]!=null;
+const E=m=>({err:m});
+
+const ACT={
+  join(s,me,{name,g}){
+    const p=s.players.find(p=>p.id===me);
+    if(p){p.name=name;if(g)p.g=g;if(s.left)delete s.left[me];if(s.status==='peek')s.ready[me]=s.ready[me]||false;return{}}
+    if(s.status!=='lobby')return E('اللعبة بدأت، انتظر الجولة الجاية');
+    if(s.players.length>=RULES.maxPlayers)return E('اللعبة ممتلئة');
+    s.players.push({id:me,name,g:g||'m'});return{};
+  },
+  quit(s,me){
+    if(s.status==='lobby'){
+      s.players=s.players.filter(p=>p.id!==me);
+      if(s.hostId===me&&s.players.length)s.hostId=s.players[0].id;return{};
+    }
+    if(!s.players.some(p=>p.id===me))return{};
+    s.left=s.left||{};s.left[me]=true;addLog(s,`${pname(s,me)} طلع من اللعبة`,me);
+    if(s.hostId===me){const a=active(s);if(a.length)s.hostId=a[0].id}
+    if(s.status==='playing'||s.status==='peek'){
+      if(active(s).length<2){s.rounds=s.round;finishRound(s);return{}}
+      if(s.status==='peek'&&active(s).every(p=>s.ready[p.id]))s.status='playing';
+      if(s.status==='playing'&&s.players[s.turn].id===me){if(s.drawn!=null)s.discard.push(s.drawn);endTurn(s)}
+    }
+    return{};
+  },
+  endGame(s,me){
+    if(s.hostId!==me)return E('صاحب اللعبة بس ينهيها');
+    s.status='over';s.result=null;s.drawn=null;s.action=null;addLog(s,'صاحب اللعبة أنهى اللعبة',me);return{};
+  },
+  rounds(s,me,{n}){if(s.hostId!==me||s.status!=='lobby')return E('');s.rounds=n;return{}},
+  start(s,me){
+    if(s.hostId!==me||s.status!=='lobby')return E('صاحب اللعبة بس يبدأ');
+    if(s.players.length<2)return E('تحتاجون لاعبين على الأقل');
+    s.left={};s.round=1;s.scores={};s.players.forEach(p=>s.scores[p.id]=[]);s.log=[];newRound(s);return{};
+  },
+  ready(s,me){
+    if(s.status!=='peek')return{};
+    s.ready[me]=true;
+    if(active(s).every(p=>s.ready[p.id])){s.status='playing';addLog(s,`الكل جاهز. يبدأ ${pname(s,s.players[s.turn].id)}`)}
+    return{};
+  },
+  draw(s,me){
+    if(!isTurn(s,me)||s.phase!=='draw')return E('مو دورك');
+    const c=popDeck(s);if(c==null)return E('ما في أوراق للسحب');
+    s.drawn=c;s.drawnFrom='deck';s.phase='drawn';
+    fx(s,me,'draw',[{from:L.deck,to:L.drawn,card:c,vis:'by'}]);return{};
+  },
+  takeFloor(s,me){
+    if(!isTurn(s,me)||s.phase!=='draw')return E('مو دورك');
+    const top=s.discard[s.discard.length-1];
+    if(top==null)return E('ما في ورقة على الأرض');
+    if(info(T(top)).must)return E('ما تقدر تاخذ هذي الورقة من الأرض');
+    s.discard.pop();s.drawn=top;s.drawnFrom='discard';s.phase='drawn';
+    addLog(s,`${pname(s,me)} أخذ ${cardName(top)} من الأرض`,me);
+    fx(s,me,'draw',[{from:L.floor,to:L.drawn,card:top,vis:'all'}]);return{};
+  },
+  keep(s,me,{slot}){
+    if(!isTurn(s,me)||s.phase!=='drawn')return E('مو دورك');
+    if(s.drawnFrom!=='discard'&&info(T(s.drawn)).must)return E('هذي الورقة لازم تنرمي');
+    if(!has(s,me,slot))return E('اختر ورقة موجودة');
+    const old=s.hands[me][slot],nw=s.drawn;s.hands[me][slot]=nw;s.discard.push(old);
+    addLog(s,`${pname(s,me)} بدّل ورقته رقم ${slot+1} ورمى ${cardName(old)}`,me);
+    fx(s,me,'swap',[{from:L.drawn,to:L.slot(me,slot),card:nw,vis:s.drawnFrom==='discard'?'all':'by'},{from:L.slot(me,slot),to:L.floor,card:old,vis:'all',delay:140}]);
+    flash(s,[[me,slot]]);endTurn(s);return{};
+  },
+  discardDrawn(s,me){
+    if(!isTurn(s,me)||s.phase!=='drawn')return E('مو دورك');
+    if(s.drawnFrom==='discard')return E('أخذتها من الأرض، لازم تبدّلها بورقة من أوراقك');
+    const c=s.drawn,f=info(T(c));s.discard.push(c);s.drawn=null;
+    addLog(s,`${pname(s,me)} رمى ${cardName(c)}`,me);
+    fx(s,me,'throw',[{from:L.drawn,to:L.floor,card:c,vis:'all'}]);
+    if(f.cmd){s.phase='action';s.action={type:f.cmd}}else endTurn(s);
+    return{};
+  },
+  skipAction(s,me){
+    if(!isTurn(s,me)||s.phase!=='action')return E('مو دورك');
+    addLog(s,`${pname(s,me)} ما استخدم ${CMD_NAME[s.action.type]}`,me);endTurn(s);return{};
+  },
+  chooseCmd(s,me,{type}){
+    if(!isTurn(s,me)||s.phase!=='action'||s.action.type!=='free')return E('مو دورك');
+    if(!FREE_CHOICES.includes(type))return E('');
+    s.action={type,via:'free'};addLog(s,`${pname(s,me)} اختار ${CMD_NAME[type]}`,me);return{};
+  },
+  resolve(s,me,{sel,to,mode,a,b,mine:mySlot}){
+    if(!isTurn(s,me)||s.phase!=='action')return E('مو دورك');
+    const type=s.action.type,N=pname(s,me);
+    if(!sel.every(c=>has(s,c.p,c.s)))return E('الورقة تغيّرت، اختر من جديد');
+    const mine=sel.filter(c=>c.p===me),oth=sel.filter(c=>c.p!==me);
+    const locked=p=>s.screwBy===p;
+    const slotTxt=c=>`${c.p===me?'ورقته':'ورقة '+pname(s,c.p)} رقم ${c.s+1}`;
+    const swapFx=(a,b)=>fx(s,me,'swap',[{from:L.slot(a.p,a.s),to:L.slot(b.p,b.s),card:null,vis:'none'},{from:L.slot(b.p,b.s),to:L.slot(a.p,a.s),card:null,vis:'none'}]);
+    if(type==='peekSelf'){
+      if(sel.length!==1||!mine.length)return E('اختر ورقة من أوراقك');
+      addLog(s,`${N} شاف ${slotTxt(sel[0])}`,me);fx(s,me,'flip');flash(s,[[sel[0].p,sel[0].s]]);
+    }else if(type==='peekOther'){
+      if(sel.length!==1||!oth.length)return E('اختر ورقة لاعب ثاني');
+      addLog(s,`${N} شاف ${slotTxt(sel[0])}`,me);fx(s,me,'flip');flash(s,[[sel[0].p,sel[0].s]]);
+    }else if(type==='swap'){
+      if(mine.length!==1||oth.length!==1)return E('اختر ورقة منك وورقة من لاعب ثاني');
+      const a=mine[0],b=oth[0];if(locked(b.p))return E('أوراق اللي قال سكرو مقفولة');
+      [s.hands[a.p][a.s],s.hands[b.p][b.s]]=[s.hands[b.p][b.s],s.hands[a.p][a.s]];
+      addLog(s,`${N} بدّل ورقته رقم ${a.s+1} مع ${slotTxt(b)}`,me);swapFx(a,b);flash(s,[[a.p,a.s],[b.p,b.s]]);
+    }else if(type==='heel'){
+      const opps=active(s).filter(p=>p.id!==me&&s.hands[p.id].some(c=>c!=null)).map(p=>p.id);
+      const okMine=mine.length===2&&!oth.length&&mine[0].s!==mine[1].s;
+      const okOth=!mine.length&&oth.length===opps.length&&new Set(oth.map(c=>c.p)).size===opps.length;
+      if(!okMine&&!okOth)return E('اختر ورقة من كل لاعب، أو ورقتين منك');
+      addLog(s,`${N} شاف ${sel.map(slotTxt).join('، ')}`,me);fx(s,me,'flip');flash(s,sel.map(c=>[c.p,c.s]));
+    }else if(type==='basra'){
+      if(sel.length!==1||!mine.length)return E('اختر ورقة من أوراقك');
+      const c=s.hands[me][sel[0].s];s.hands[me][sel[0].s]=null;s.discard.push(c);
+      addLog(s,`${N} رمى ${cardName(c)} بالبصرة`,me);
+      fx(s,me,'throw',[{from:L.slot(me,sel[0].s),to:L.floor,card:c,vis:'all'}]);
+    }else if(type==='take'){
+      if(sel.length!==1||!mine.length)return E('اختر ورقة من أوراقك');
+      if(!to||to===me||!s.hands[to]||gone(s,to))return E('اختر اللاعب اللي تعطيه');
+      if(locked(to))return E('أوراق اللي قال سكرو مقفولة');
+      const c=s.hands[me][sel[0].s];s.hands[me][sel[0].s]=null;
+      let j=s.hands[to].indexOf(null);if(j<0){j=s.hands[to].length;s.hands[to].push(c)}else s.hands[to][j]=c;
+      addLog(s,`${N} عطى ${pname(s,to)} ورقته رقم ${sel[0].s+1}`,me);
+      fx(s,me,'swap',[{from:L.slot(me,sel[0].s),to:L.slot(to,j),card:null,vis:'none'}]);flash(s,[[to,j]]);
+    }else if(type==='seeswap'){
+      const opps=active(s).filter(p=>p.id!==me&&s.hands[p.id].some(c=>c!=null)).map(p=>p.id);
+      if(mine.length||oth.length!==opps.length||new Set(oth.map(c=>c.p)).size!==opps.length)return E('اختر ورقة من كل لاعب');
+      const inSel=c=>!!c&&oth.some(x=>x.p===c.p&&x.s===c.s);
+      const seen=sel.map(slotTxt).join('، ');
+      if(mode==='mine'){
+        if(!inSel(a))return E('اختر وحدة من الأوراق اللي شفتها');
+        if(locked(a.p))return E('أوراق اللي قال سكرو مقفولة');
+        if(!has(s,me,mySlot))return E('اختر ورقة من أوراقك');
+        [s.hands[me][mySlot],s.hands[a.p][a.s]]=[s.hands[a.p][a.s],s.hands[me][mySlot]];
+        addLog(s,`${N} شاف ${seen} وبدّل ${slotTxt(a)} بورقته رقم ${mySlot+1}`,me);swapFx({p:me,s:mySlot},a);flash(s,[[me,mySlot],[a.p,a.s]]);
+      }else if(mode==='between'){
+        if(!inSel(a)||!inSel(b)||a.p===b.p)return E('اختر ورقتين من لاعبين مختلفين');
+        if(locked(a.p)||locked(b.p))return E('أوراق اللي قال سكرو مقفولة');
+        [s.hands[a.p][a.s],s.hands[b.p][b.s]]=[s.hands[b.p][b.s],s.hands[a.p][a.s]];
+        addLog(s,`${N} شاف ${seen} وبدّل ${slotTxt(a)} مع ${slotTxt(b)}`,me);swapFx(a,b);flash(s,[[a.p,a.s],[b.p,b.s]]);
+      }else{addLog(s,`${N} شاف ${seen} وما بدّل`,me);fx(s,me,'flip');flash(s,sel.map(c=>[c.p,c.s]))}
+    }
+    endTurn(s);return{};
+  },
+  throwCard(s,me,{slot}){
+    if(s.status!=='playing')return E('');
+    if(s.screwBy===me)return E('قلت سكرو، أوراقك مقفولة');
+    if(!has(s,me,slot))return E('');
+    const top=s.discard[s.discard.length-1];if(top==null)return E('ما في ورقة على الأرض');
+    const c=s.hands[me][slot];
+    const myMove=isTurn(s,me)&&s.phase==='draw';
+    if(T(c)===T(top)){
+      s.hands[me][slot]=null;s.discard.push(c);
+      addLog(s,`${pname(s,me)} رمى ${cardName(c)} مطابقة ✓`,me);
+      fx(s,me,'slap',[{from:L.slot(me,slot),to:L.floor,card:c,vis:'all'}]);
+      if(myMove)endTurn(s);
+      return{};
+    }
+    const pen=popDeck(s);if(pen!=null)s.hands[me].push(pen);
+    addLog(s,`${pname(s,me)} رمى ${cardName(c)} غلط وأخذ ورقة عقوبة`,me);
+    fx(s,me,'wrong',pen!=null?[{from:L.deck,to:L.slot(me,s.hands[me].length-1),card:null,vis:'none'}]:[]);
+    flash(s,[[me,slot]]);
+    if(myMove)endTurn(s);
+    return{wrong:true};
+  },
+  screw(s,me,{guess}={}){
+    if(!isTurn(s,me)||s.phase!=='draw')return E('تقدر تقول سكرو بداية دورك بس');
+    if(s.screwBy)return E('في أحد قال سكرو قبلك');
+    if(lapsLeft(s)>0)return E(`سكرو متاح بعد ${lapsLeft(s)} أدوار`);
+    if(!guess||!['p','deck','floor'].includes(guess.k)||(guess.k==='p'&&!s.players.some(p=>p.id===guess.p)))return E('خمّن وين الحرامي');
+    s.screwBy=me;s.thiefGuess=guess.k==='p'?{k:'p',p:guess.p}:{k:guess.k};
+    addLog(s,`${pname(s,me)} ${said(s,me)} سكرو!`,me);fx(s,me,'screw');endTurn(s);return{};
+  },
+  skipTurn(s,me){
+    if(s.hostId!==me||s.status!=='playing')return E('');
+    const cur=s.players[s.turn].id;if(s.drawn!=null)s.discard.push(s.drawn);
+    addLog(s,`صاحب اللعبة تخطّى دور ${pname(s,cur)}`,me);endTurn(s);return{};
+  },
+  nextRound(s,me){if(s.hostId!==me||s.status!=='reveal')return E('');s.round++;newRound(s);return{}},
+  toLobby(s,me){
+    if(s.hostId!==me||s.status!=='over')return E('');
+    s.players=s.players.filter(p=>!gone(s,p.id));s.left={};
+    s.status='lobby';s.round=0;s.result=null;s.scores={};return{};
+  }
+};
+
+/* ---------- sound (synthesized, no files) ---------- */
+const SFX={ctx:null,on:true};
+function actx(){
+  if(!SFX.ctx){const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;SFX.ctx=new C()}
+  if(SFX.ctx.state==='suspended')SFX.ctx.resume().catch(()=>{});
+  return SFX.ctx;
+}
+function noise(c,dur,freq,q,gain,when=0){
+  const len=Math.max(1,Math.floor(c.sampleRate*dur)),buf=c.createBuffer(1,len,c.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3);
+  const src=c.createBufferSource();src.buffer=buf;
+  const f=c.createBiquadFilter();f.type='bandpass';f.frequency.value=freq;f.Q.value=q;
+  const g=c.createGain();g.gain.value=gain;src.connect(f);f.connect(g);g.connect(c.destination);src.start(c.currentTime+when);
+}
+function tone(c,freq,dur,type,gain,when=0){
+  const o=c.createOscillator(),g=c.createGain(),t=c.currentTime+when;
+  o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(gain,t+0.015);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+0.02);
+}
+const SOUNDS={
+  draw:c=>noise(c,.13,2600,1.1,.55),
+  flip:c=>{noise(c,.07,3600,2,.4);noise(c,.06,2400,2,.25,.07)},
+  swap:c=>{noise(c,.16,1600,.8,.5);noise(c,.12,2900,1.4,.35,.14)},
+  throw:c=>{noise(c,.1,1900,1,.6);noise(c,.07,500,1,.55,.04)},
+  slap:c=>{noise(c,.09,1100,.7,.95);tone(c,700,.14,'triangle',.14,.05)},
+  wrong:c=>{tone(c,220,.18,'square',.07);tone(c,160,.26,'square',.07,.15)},
+  turn:c=>{tone(c,660,.14,'sine',.16);tone(c,990,.22,'sine',.14,.11)},
+  screw:c=>{tone(c,523,.12,'triangle',.18);tone(c,659,.12,'triangle',.18,.1);tone(c,784,.34,'triangle',.2,.2)},
+  shuffle:c=>{for(let i=0;i<7;i++)noise(c,.06,2000+Math.random()*900,1.5,.35,i*.055)},
+  win:c=>{[523,659,784,1047].forEach((f,i)=>tone(c,f,.25,'triangle',.13,i*.09))}
+};
+function play(n){if(!SFX.on||!SOUNDS[n])return;try{const c=actx();if(c)SOUNDS[n](c)}catch(e){}}
+let arVoice=null,speechUnlocked=false;
+function pickVoice(){try{const vs=speechSynthesis.getVoices();arVoice=vs.find(v=>/^ar[-_](AE|SA)/i.test(v.lang))||vs.find(v=>/^ar/i.test(v.lang))||null}catch(e){}}
+if('speechSynthesis' in window){pickVoice();try{speechSynthesis.onvoiceschanged=pickVoice}catch(e){}}
+function speak(text){
+  if(!SFX.on||!('speechSynthesis' in window))return;
+  try{const u=new SpeechSynthesisUtterance(text);u.lang=arVoice?arVoice.lang:'ar-SA';if(arVoice)u.voice=arVoice;u.rate=1.05;speechSynthesis.speak(u)}catch(e){}
+}
+document.addEventListener('pointerdown',()=>{if(speechUnlocked||!('speechSynthesis' in window))return;speechUnlocked=true;try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}catch(e){}},{passive:true});
+document.addEventListener('pointerdown',()=>{if(SFX.on){try{actx()}catch(e){}}},{passive:true});
+
+/* ---------- platform ---------- */
+let db=null,me=null,canWrite=true,code=null,gameRef=null,unsub=null,S=null;
+const ui={mode:null,sel:[],pick:[],voiceKey:'',seeStep:0,seeSwapMode:null,reveals:{},revealAt:{},flashCells:{},flashSeq:0,fxSeq:0,lastLog:0,turnKey:'',wasMyTurn:false,busy:false,homeErr:'',sheet:null,creating:false};
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function lsSet(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}}
+SFX.on=lsGet('skrew.sound')!=='off';
+let toastT;
+function toast(m){if(!m)return;const t=document.getElementById('toast');t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2800)}
+
+/* Moves apply on this phone first (instant), then sync to the shared table in order. */
+const OPTIMISTIC=new Set(['draw','takeFloor','keep','discardDrawn','skipAction','resolve','throwCard','screw','ready']);
+let chain=Promise.resolve();
+ui.pending=0;
+function commit(name,args){
+  if(!gameRef)return Promise.resolve(null);
+  if(S&&OPTIMISTIC.has(name)&&ui.pending<4){
+    const t=JSON.parse(JSON.stringify(S));
+    const res=ACT[name](t,me,args||{});
+    if(res.err!==undefined){toast(res.err);return Promise.resolve(null)}
+    t.rev=(S.rev||0)+1;t._local=true;
+    const prev=S;S=t;onState(prev);
+    ui.pending++;
+    chain=chain.then(()=>netCommit(name,args)).finally(()=>{ui.pending--});
+    return Promise.resolve(res);
+  }
+  if(ui.busy)return Promise.resolve(null);
+  ui.busy=true;
+  const p=chain.then(()=>netCommit(name,args)).finally(()=>{ui.busy=false});
+  chain=p;
+  return p;
+}
+async function netCommit(name,args){
+  let res=null,errMsg=null;
+  try{
+    const r=await runTransaction(gameRef,cur=>{
+      if(cur===null)return null;
+      const s=JSON.parse(cur.s);delete s._local;
+      res=ACT[name](s,me,args||{});
+      if(res.err!==undefined){errMsg=res.err;return}
+      errMsg=null;s.rev=(cur.rev||0)+1;s.updated=Date.now();
+      return {s:JSON.stringify(s),rev:s.rev};
+    },{applyLocally:false});
+    if(!r.committed){if(errMsg)toast(errMsg);await resync();return null}
+    if(!r.snapshot.exists()){toast('اللعبة انحذفت');return null}
+    if(unsub)adopt(JSON.parse(r.snapshot.val().s));
+    return res;
+  }catch(e){toast('صار خطأ في الاتصال، جرّب مرة ثانية');await resync();return null}
+}
+async function resync(){if(!unsub||!gameRef)return;try{const sn=await get(gameRef);if(sn.exists())adopt(JSON.parse(sn.val().s),true)}catch(e){}}
+function adopt(d,force){
+  if(!d)return;
+  if(!force&&S&&(d.rev||0)<(S.rev||0))return;
+  const prev=S;S=d;onState(prev);
+}
+function watch(c){
+  unsub?.();code=c;gameRef=ref(db,'games/'+c);lsSet('skrew.code',c);
+  let first=true;
+  unsub=onValue(gameRef,snap=>{
+    if(!snap.exists()){if(S)toast('اللعبة انتهت أو انحذفت');leaveLocal();return}
+    const d=JSON.parse(snap.val().s);
+    if(first){ui.lastLog=d.logSeq||0;ui.flashSeq=d.flash?.seq||0;ui.fxSeq=d.fx?.seq||0;first=false;const prev=S;S=d;onState(prev);return}
+    adopt(d);
+  },()=>toast('انقطع الاتصال، حدّث الصفحة'));
+}
+function leaveLocal(){unsub?.();unsub=null;S=null;gameRef=null;code=null;lsSet('skrew.code',null);hideZoom();closeSheet();renderHome()}
+
+function onState(prev){
+  const s=S;
+  const fresh=(s.log||[]).filter(l=>l.id>ui.lastLog);
+  if(fresh.length){ui.lastLog=fresh[fresh.length-1].id;const o=fresh.filter(l=>l.by!==me);if(o.length)toast(o[o.length-1].m)}
+  if(s.flash&&s.flash.seq!==ui.flashSeq){
+    ui.flashSeq=s.flash.seq;ui.flashCells={};s.flash.cells.forEach(([p,i])=>ui.flashCells[p+'|'+i]=1);
+    setTimeout(()=>{ui.flashCells={};render()},1700);
+  }
+  const key=`${s.round}-${s.status}-${s.turnsTaken}-${s.phase}`;
+  if(key!==ui.turnKey){ui.turnKey=key;const cap=Date.now()+RULES.revealMs;for(const k in ui.reveals)if(ui.reveals[k]>cap)ui.reveals[k]=cap;ui.sel=[];ui.pick=[];ui.keepMode=false;ui.seeStep=0;ui.seeSwapMode=null;if(ui.mode==='throw'&&s.status!=='playing')ui.mode=null}
+  const mine=isTurn(s,me);
+  let newFx=null;
+  if(s.fx&&s.fx.seq!==ui.fxSeq){ui.fxSeq=s.fx.seq;newFx=s.fx}
+  const before=newFx?captureFrom(newFx):null;
+  render();
+  if(newFx){play(newFx.sound);if(before)animate(newFx,before);if(newFx.sound==='screw'&&newFx.by)speak(`${pname(s,newFx.by)} ${said(s,newFx.by)} سكرو`)}
+  if(s.status==='playing'){const vk=`${s.round}-${s.turnsTaken}`;if(vk!==ui.voiceKey){ui.voiceKey=vk;const p=s.players[s.turn];if(p)speak(`دور ${p.name}`)}}
+  if(mine&&!ui.wasMyTurn){setTimeout(()=>play('turn'),newFx?300:0);try{navigator.vibrate?.(120)}catch(e){}}
+  ui.wasMyTurn=mine;
+}
+function reveal(ids){const now=Date.now(),until=now+RULES.revealMs;ids.forEach(id=>{ui.reveals[id]=until;ui.revealAt[id]=now});setTimeout(render,RULES.revealMs+60)}
+const revealed=id=>(ui.reveals[id]||0)>Date.now();
+
+/* ---------- card flights ---------- */
+const reduceMotion=()=>window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+function locEl(loc){
+  let sel;
+  if(loc.k==='deck')sel='[data-zone="deck"] .card';
+  else if(loc.k==='discard')sel='[data-zone="discard"] .card';
+  else if(loc.k==='drawn')sel='[data-zone="drawn"] .card';
+  else sel=`.slot[data-p="${CSS.escape(loc.p)}"][data-s="${loc.s}"] .card`;
+  return app.querySelector(sel);
+}
+function captureFrom(f){
+  if(reduceMotion()||!f.moves?.length)return null;
+  return f.moves.map(m=>{const el=locEl(m.from);return el?el.getBoundingClientRect():null});
+}
+function animate(f,froms){
+  f.moves.forEach((m,i)=>{
+    const from=froms[i],toEl=locEl(m.to);
+    if(!from||!toEl)return;
+    const to=toEl.getBoundingClientRect();
+    if(!to.width||!from.width)return;
+    const showFace=m.card!=null&&(m.vis==='all'||(m.vis==='by'&&f.by===me));
+    const g=document.createElement('div');g.className='flyer';
+    g.innerHTML=showFace?faceHTML(m.card,''):backHTML('');
+    const card=g.firstElementChild;card.style.setProperty('--w',from.width+'px');
+    g.style.left=from.left+'px';g.style.top=from.top+'px';
+    document.body.appendChild(g);
+    toEl.style.visibility='hidden';
+    const dx=to.left-from.left,dy=to.top-from.top,sc=to.width/from.width;
+    const lift=Math.min(60,Math.hypot(dx,dy)*.25);
+    const anim=g.animate([
+      {transform:'translate(0,0) scale(1) rotate(0deg)'},
+      {transform:`translate(${dx*.5}px,${dy*.5-lift}px) scale(${(1+sc)/2*1.08}) rotate(${dx>0?6:-6}deg)`,offset:.5},
+      {transform:`translate(${dx}px,${dy}px) scale(${sc}) rotate(0deg)`}
+    ],{duration:320,delay:m.delay||0,easing:'cubic-bezier(.25,.7,.3,1)',fill:'both'});
+    const done=()=>{g.remove();if(toEl.isConnected)toEl.style.visibility=''};
+    anim.finished.then(done,done);
+  });
+}
+
+/* ---------- card faces ---------- */
+const C={navy:'#2e2b63',teal:'#13807c',green:'#2f9a4a',red:'#c7372f'};
+const IC={
+  swap:'<path d="M4 8h14l-4-4M20 16H6l4 4"/>',
+  take:'<rect x="3" y="5" width="9" height="13" rx="1.5"/><path d="M14 11.5h7M18 8.5l3 3-3 3"/>',
+  heel:'<path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.5 3.5v4h-4"/><circle cx="12" cy="12" r="2.2"/>',
+  basra:'<path d="M12 3c2 3 5 5 5 9a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5.3 1.5 1 2.5 2 3 0-3 0-5 1-7.5z"/>',
+  seeswap:'<path d="M2.5 9s2.7-4.5 7.5-4.5S17.5 9 17.5 9s-2.7 4.5-7.5 4.5S2.5 9 2.5 9z"/><circle cx="10" cy="9" r="2"/><path d="M6 19h14l-3-3M20 19l-3 3"/>',
+  thief:'<path d="M2 10c3-2.2 6.5-2.2 10 0 3.5-2.2 7-2.2 10 0-.8 4.2-3 6.2-6 6.2-1.8 0-3-1-4-2.2-1 1.2-2.2 2.2-4 2.2-3 0-5.2-2-6-6.2z"/><circle cx="7.3" cy="11.6" r="1.4"/><circle cx="16.7" cy="11.6" r="1.4"/>',
+  free:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>'
+};
+const svg=(k,cls='ico')=>`<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]}</svg>`;
+function backHTML(sz){return `<div class="card back ${sz}"><span class="bk">سكرو</span></div>`}
+function faceHTML(id,sz){
+  const t=T(id),f=info(t);
+  const idx=l=>`<span class="idx">${l}</span><span class="idx b">${l}</span>`;
+  const card=(cls,hue,on,inner)=>`<div class="card face ${cls} ${sz}" style="--hue:${hue};--on:${on||hue}">${inner}</div>`;
+  if(f.kind==='num')return card('k-num',C.navy,'',`${idx(f.v)}<span class="ring"><span class="big">${f.v}</span></span>`);
+  if(f.kind==='self'||f.kind==='other')return card('k-'+f.kind,C.teal,'',`${idx(f.v)}<span class="ring"><span class="big">${f.v}</span></span><span class="tag">${f.kind==='self'?'شوف ورقتك':'شوف ورقة غيرك'}</span>`);
+  if(f.kind==='p20')return card('solid k-wide',C.red,'#a4f0d6',`${idx('20')}<span class="big">+20</span>`);
+  if(f.kind==='m1')return card('solid k-wide',C.green,'#ffd34d',`${idx('-1')}<span class="big">-1</span>`);
+  if(f.kind==='gs')return card('solid k-screw',C.green,'#ffffff',`${idx('0')}<i class="screw"></i><span class="ttlc">سكرو</span>`);
+  if(f.kind==='rs')return card('solid k-screw',C.red,'#ffffff',`${idx('25')}<i class="screw"></i><span class="ttlc">سكرو</span>`);
+  if(f.kind==='thief')return card('k-cmd',C.navy,'',`${idx('10')}${svg('thief')}<span class="ttlc">الحرامي</span>`);
+  return card('k-cmd',C.navy,'',`${idx('10')}${svg(f.cmd)}<span class="ttlc">${CMD_NAME[f.cmd]}</span>`);
+}
+
+/* ---------- rendering ---------- */
+const app=document.getElementById('app');
+function playerOrder(s){const i=s.players.findIndex(p=>p.id===me);return i<0?s.players:[...s.players.slice(i),...s.players.slice(0,i)]}
+const totalScore=(s,id)=>(s.scores?.[id]||[]).reduce((a,b)=>a+b,0);
+const floorTop=s=>s.discard[s.discard.length-1];
+const canTakeFloor=s=>isTurn(s,me)&&s.phase==='draw'&&ui.mode!=='throw'&&canWrite&&floorTop(s)!=null&&!info(T(floorTop(s))).must;
+
+function myPicksBusy(s){
+  if(!isTurn(s,me))return false;
+  if(s.phase==='action')return true;
+  if(s.phase==='drawn')return true;
+  return false;
+}
+function canBurn(s,pid,i){
+  return pid===me&&has(s,pid,i)&&canWrite&&s.status==='playing'&&s.screwBy!==me&&!gone(s,me)&&s.discard.length>0&&!myPicksBusy(s);
+}
+function canPick(s,pid,i){
+  if(!has(s,pid,i)||!canWrite||s.status!=='playing')return false;
+  if(ui.mode==='throw')return pid===me&&s.screwBy!==me&&s.discard.length>0;
+  if(!isTurn(s,me))return false;
+  if(s.phase==='drawn'){
+    const f=info(T(s.drawn));
+    if(s.drawnFrom==='discard'||ui.keepMode)return pid===me;
+    if(f.must)return false;
+    if(!f.cmd)return pid===me;
+    const lk=s.screwBy===pid;
+    switch(f.cmd){case 'peekSelf':case 'basra':case 'take':return pid===me;case 'peekOther':return pid!==me;case 'seeswap':return pid!==me;case 'swap':case 'heel':return pid===me||!lk;}
+    return false;
+  }
+  if(s.phase!=='action')return false;
+  const t=s.action.type,mineSel=ui.sel.filter(c=>c.p===me),othSel=ui.sel.filter(c=>c.p!==me),locked=p=>s.screwBy===p;
+  switch(t){
+    case 'peekSelf':case 'basra':return pid===me;
+    case 'peekOther':return pid!==me;
+    case 'swap':return pid===me||!locked(pid);
+    case 'heel':if(mineSel.length)return pid===me;if(othSel.length)return pid!==me;return true;
+    case 'take':return ui.sel.length?(pid!==me&&!locked(pid)&&!gone(s,pid)):pid===me;
+    case 'seeswap':{
+      if(ui.seeStep===0)return pid!==me;
+      const seen=ui.sel.some(c=>c.p===pid&&c.s===i);
+      if(ui.seeSwapMode==='mine')return ui.pick.length?pid===me:(seen&&!locked(pid));
+      if(ui.seeSwapMode==='between')return seen&&!locked(pid)&&!(ui.pick[0]&&ui.pick[0].p===pid&&ui.pick[0].s!==i);
+      return false;
+    }
+  }
+  return false;
+}
+function slotHTML(s,pid,i,sz){
+  const c=s.hands[pid][i];
+  if(c==null)return `<div class="slot empty"><span class="hole"></span><span class="n">${i+1}</span></div>`;
+  const showAll=s.status==='reveal'||s.status==='over';
+  const peek=pid===me&&s.status==='peek'&&RULES.peekSlots.includes(i)&&!s.ready[me];
+  const up=showAll||peek||revealed(c);
+  const can=canPick(s,pid,i),tt=!can&&canBurn(s,pid,i);
+  const sel=ui.sel.some(x=>x.p===pid&&x.s===i),pk=ui.pick.some(x=>x.p===pid&&x.s===i);
+  const fl=ui.flashCells[pid+'|'+i];
+  let face=up?faceHTML(c,sz):backHTML(sz);
+  if(up&&revealed(c)&&Date.now()-(ui.revealAt[c]||0)<450)face=face.replace('class="card face','class="card face flipin');
+  const lbl=pid===me?`ورقتك رقم ${i+1}`:`ورقة ${pname(s,pid)} رقم ${i+1}`;
+  return `<button class="slot${can?' can':''}${sel?' sel':''}${pk?' pk':''}${tt?' tt':''}${fl?' flash':''}" data-p="${esc(pid)}" data-s="${i}" ${up?`data-face="${c}" data-label="${esc(lbl)}"`:''} aria-disabled="${can?'false':'true'}" aria-label="ورقة ${i+1}">${face}<span class="n">${i+1}</span></button>`;
+}
+
+function render(){if(!S)return;if(S.status==='lobby')return renderLobby(S);renderGame(S)}
+
+const SPEAKER_ON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
+const SPEAKER_OFF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>';
+const soundBtn=()=>`<button class="btn sm ghost icon" data-a="sound" aria-label="${SFX.on?'كتم الصوت':'تشغيل الصوت'}">${SFX.on?SPEAKER_ON:SPEAKER_OFF}</button>`;
+
+function renderHome(msg){
+  const nm=lsGet('skrew.name')||'';
+  app.innerHTML=`<div class="home">
+    <div class="mark">سكرو<small>العبوها أونلاين، كل واحد من جواله</small></div>
+    ${msg?`<p class="err" style="text-align:center">${esc(msg)}</p>`:''}
+    <div class="panel">
+      <label for="nm">اسمك في اللعبة</label>
+      <input id="nm" type="text" maxlength="14" value="${esc(nm)}" placeholder="مثلاً: آلاء" autocomplete="nickname">
+      <div class="seg" role="group" aria-label="ولد أو بنت"><button class="btn sm ${myG()==='f'?'on':''}" data-a="setG" data-g="f">بنت</button><button class="btn sm ${myG()==='m'?'on':''}" data-a="setG" data-g="m">ولد</button></div>
+      <button class="btn primary" data-a="create" ${ui.creating?'disabled':''}>لعبة جديدة</button>
+    </div>
+    <div class="panel">
+      <label for="jc">عندك رمز من صاحبك؟</label>
+      <div class="row"><input id="jc" class="code grow" type="text" maxlength="4" placeholder="ABCD" autocomplete="off"><button class="btn" data-a="join">انضم</button></div>
+      ${ui.homeErr?`<p class="err">${esc(ui.homeErr)}</p>`:''}
+    </div>
+    <button class="btn ghost" data-a="rules">القواعد</button>
+  </div>`;
+}
+function blocked(msg){app.innerHTML=`<div class="center-msg"><div class="mark">سكرو</div><p style="max-width:34ch">${msg}</p></div>`}
+
+function renderLobby(s){
+  const host=s.hostId===me;
+  app.innerHTML=`<div class="home">
+    <div class="top"><span class="ttl">سكرو</span><span class="grow"></span>${soundBtn()}<button class="btn sm ghost" data-a="rules">القواعد</button><button class="btn sm ghost" data-a="exit">خروج</button></div>
+    <div class="panel">
+      <label>رمز اللعبة</label>
+      <div class="code-big" id="codeTxt">${esc(s.code)}</div>
+      <button class="btn sm" data-a="copy">نسخ الرمز</button>
+      <p class="note">أرسل رابط اللعبة والرمز لأصحابك. كل واحد يدخل اسمه والرمز.</p>
+    </div>
+    <div class="panel">
+      <label>اللاعبين (${s.players.length}/${RULES.maxPlayers})</label>
+      <ul class="plist">${s.players.map(p=>`<li><span class="grow">${esc(p.name)}</span>${p.id===s.hostId?'<span class="chip gold">صاحب اللعبة</span>':''}${p.id===me?'<span class="chip">أنت</span>':''}</li>`).join('')}</ul>
+      <label>عدد الجولات</label>
+      <div class="seg">${[3,5,7].map(n=>`<button class="btn sm ${s.rounds===n?'on':''}" data-a="rounds" data-n="${n}" ${host?'':'disabled'}>${n}</button>`).join('')}</div>
+      ${host?`<button class="btn primary" data-a="start" ${s.players.length<2?'disabled':''}>ابدأ اللعب</button>${s.players.length<2?'<p class="note">بانتظار لاعب ثاني على الأقل…</p>':''}`:'<p class="note">بانتظار صاحب اللعبة يبدأ…</p>'}
+    </div>
+  </div>`;
+}
+
+function statusText(s){
+  const cur=s.players[s.turn],mine=isTurn(s,me);
+  if(gone(s,me))return 'طلعت من هذي اللعبة';
+  if(s.status==='peek'){
+    if(!s.ready[me])return `احفظ ورقتك 1 و 2<span class="sub">بعدها اضغط جاهز، وتنقلب الأوراق</span>`;
+    const w=active(s).filter(p=>!s.ready[p.id]).map(p=>esc(p.name));
+    return `بانتظار: ${w.join('، ')}`;
+  }
+  if(s.status!=='playing')return '';
+  if(ui.mode==='throw')return `اختر ورقة تطابق ورقة الأرض<span class="sub">الرمية الغلط عقوبتها ورقة زيادة</span>`;
+  if(mine){
+    if(s.phase==='draw'){const l=lapsLeft(s);return `دورك! اسحب من الكومة أو خذ من الأرض<span class="sub">${s.screwBy?'آخر دور قبل الكشف':l>0?`سكرو متاح بعد ${l} أدوار`:'أو قل سكرو إذا مجموعك قليل'}</span>`}
+    if(s.phase==='drawn'){
+      if(s.drawnFrom==='discard')return 'اختر ورقة من أوراقك تبدّلها بورقة الأرض';
+      const df=info(T(s.drawn));
+      if(df.must)return 'هذي الورقة لازم ترميها';
+      if(df.cmd&&!ui.keepMode)return `سحبت ${CMD_NAME[df.cmd]}<span class="sub">${df.cmd==='free'?'اضغط استخدم واختر الأمر':'اضغط على الورقة اللي تبي تستخدم عليها الأمر'}، أو احتفظ فيها بدل ورقة</span>`;
+      if(df.cmd)return 'اختر الورقة اللي تطلع بدالها';
+      return 'بدّلها بورقة من أوراقك، أو ارمها';
+    }
+    if(s.phase==='action'){
+      const at=s.action.type;
+      if(at==='seeswap'&&ui.seeStep===1){
+        if(ui.seeSwapMode==='mine')return ui.pick.length?'اختر ورقة من أوراقك تعطيها له':'اختر ورقة من اللي شفتها';
+        if(ui.seeSwapMode==='between')return 'اختر ورقتين من لاعبين مختلفين وتتبدّل';
+        return 'تبدّل؟<span class="sub">مع ورقة منك، أو بين اللاعبين</span>';
+      }
+      if(at==='take'&&ui.sel.length)return 'اضغط على أي ورقة عند اللاعب اللي تعطيه';
+      return `${CMD_NAME[s.action.type]}<span class="sub">${CMD_HELP[s.action.type]}</span>`;
+    }
+  }
+  const n=esc(cur.name);
+  if(s.phase==='drawn')return s.drawnFrom==='discard'?`${n} أخذ من الأرض وبيبدّل`:`${n} يفكّر بالورقة اللي سحبها`;
+  if(s.phase==='action')return `${n} يستخدم ${CMD_NAME[s.action.type]}`;
+  return `دور ${n}`;
+}
+
+function renderGame(s){
+  const order=playerOrder(s),opps=order.filter(p=>p.id!==me),meP=s.players.find(p=>p.id===me);
+  const cur=s.players[s.turn],mine=isTurn(s,me),out=gone(s,me);
+  const top=floorTop(s);
+  const lastLog=(s.log||[]).slice(-1)[0];
+  let midDrawn='';
+  if(s.status==='playing'&&s.drawn!=null){
+    const pub=s.drawnFrom==='discard';
+    midDrawn=`<div class="drawn-zone${mine&&!pub?' swipe':''}" data-zone="drawn" ${mine||pub?`data-face="${s.drawn}" data-label="${pub?'ورقة الأرض':'الورقة اللي سحبتها'}"`:''}>${mine||pub?faceHTML(s.drawn,'c-lg'):backHTML('c-md')}<span class="note">${mine?(pub?'أخذت من الأرض':'← اسحبها للأرض ترميها'):esc(cur.name)+(pub?' أخذ':' سحب')}</span></div>`;
+  }
+  const deckCan=mine&&s.phase==='draw'&&ui.mode!=='throw'&&canWrite&&!out;
+  const floorCan=canTakeFloor(s)&&!out;
+
+  const oppsHTML=opps.map(p=>`<div class="opp ${s.status==='playing'&&cur.id===p.id?'turn':''} ${gone(s,p.id)?'gone':''}">
+      <div class="who"><div class="nm">${esc(p.name)}</div><div class="sc">${totalScore(s,p.id)} نقطة</div>
+      ${gone(s,p.id)?'<span class="chip">طلع</span>':s.screwBy===p.id?`<span class="chip red">${said(s,p.id)} سكرو</span>`:s.status==='peek'&&s.ready[p.id]?'<span class="chip green">جاهز</span>':''}</div>
+      <div class="hand">${s.hands[p.id].map((_,i)=>slotHTML(s,p.id,i,'c-op')).join('')}</div>
+    </div>`).join('');
+  const myHand=meP?s.hands[me].map((_,i)=>slotHTML(s,me,i,'c-md')).join(''):'<p class="note">أنت تتفرج على هذي اللعبة</p>';
+
+  let acts='';
+  if(meP&&canWrite&&!out){
+    if(s.status==='peek'&&!s.ready[me])acts=`<button class="btn primary" data-a="ready">جاهز، حفظتها</button>`;
+    else if(s.status==='playing'){
+      const b=[];
+      if(mine&&s.phase==='draw'&&ui.mode!=='throw'){
+        b.push(`<button class="btn primary" data-a="draw">اسحب من الكومة</button>`);
+        if(top!=null)b.push(`<button class="btn" data-a="takeFloor" ${floorCan?'':'disabled'}>خذ من الأرض</button>`);
+        b.push(`<button class="btn danger" data-a="screw" ${(s.screwBy||lapsLeft(s)>0)?'disabled':''}>سكرو!</button>`);
+      }
+      if(mine&&s.phase==='drawn'&&ui.mode!=='throw'&&s.drawnFrom!=='discard'){
+        const f=info(T(s.drawn));
+        if(f.cmd&&!ui.keepMode){b.push(`<button class="btn primary" data-a="discard">استخدم: ${CMD_NAME[f.cmd]}</button>`);b.push(`<button class="btn" data-a="keepMode">احتفظ فيها بدل ورقة</button>`)}
+        else if(f.cmd)b.push(`<button class="btn ghost" data-a="keepBack">رجوع</button>`);
+        else b.push(`<button class="btn primary" data-a="discard">ارمها</button>`);
+      }
+      if(mine&&s.phase==='action'&&ui.mode!=='throw'){
+        const t=s.action.type;
+        if(t==='swap')b.push(`<button class="btn primary" data-a="confirm" ${ui.sel.length===2?'':'disabled'}>بدّل</button>`);
+        if(t==='heel')b.push(`<button class="btn primary" data-a="confirm" ${heelComplete(s)?'':'disabled'}>اكشف</button>`);
+        if(t==='free')FREE_CHOICES.forEach(c=>b.push(`<button class="btn" data-a="choose" data-t="${c}">${CMD_NAME[c]}</button>`));
+        if(t==='seeswap'&&ui.seeStep===0)b.push(`<button class="btn primary" data-a="seeReveal" ${oneEach(s)?'':'disabled'}>اكشف</button>`);
+        if(t==='seeswap'&&ui.seeStep===1){
+          if(!ui.seeSwapMode){
+            b.push(`<button class="btn primary" data-a="seeMine">بدّل مع ورقة مني</button>`);
+            if(ui.sel.length>=2)b.push(`<button class="btn" data-a="seeBetween">بدّل بينهم</button>`);
+            b.push(`<button class="btn ghost" data-a="seeNo">لا، خلّها</button>`);
+          }else b.push(`<button class="btn ghost" data-a="seeBack">رجوع</button>`);
+        }else b.push(`<button class="btn ghost" data-a="skip">تخطّي</button>`);
+      }
+      acts=b.join('');
+    }
+  }
+
+  app.innerHTML=`
+    <div class="top"><span class="ttl">سكرو</span><span class="meta">جولة ${s.round} من ${s.rounds} · ${esc(s.code)}</span><span class="grow"></span>
+      ${soundBtn()}<button class="btn sm ghost" data-a="rules">القواعد</button><button class="btn sm ghost" data-a="exit">خروج</button></div>
+    <div class="opps">${oppsHTML}</div>
+    <div class="mid">
+      ${s.screwBy&&s.status==='playing'?`<span class="banner">${esc(pname(s,s.screwBy))} ${said(s,s.screwBy)} سكرو! آخر دور</span>`:''}
+      <div class="pile-row">
+        <div class="pile"><button class="slot${deckCan?' can':''}" data-a="draw" data-zone="deck" ${deckCan?'':'disabled'} aria-label="اسحب من الكومة"><div class="stack deck">${backHTML('c-md')}</div></button><span>${s.deck.length} ورقة</span></div>
+        ${midDrawn}
+        <div class="pile"><button class="slot${floorCan?' can':''}" data-a="takeFloor" data-zone="discard" ${top!=null?`data-face="${top}" data-label="ورقة الأرض"`:''} aria-label="الأرض"><div class="stack">${top!=null?faceHTML(top,'c-md'):'<div class="card c-md empty-pile"></div>'}</div></button><span>الأرض</span></div>
+      </div>
+      <div class="status">${statusText(s)}</div>
+      <div class="log">${lastLog?esc(lastLog.m):''}</div>
+    </div>
+    <div class="me ${mine?'turn':''}">
+      <div class="head"><span>${meP?esc(meP.name):''}</span>${meP?`<span class="chip">${totalScore(s,me)} نقطة</span>`:''}${s.screwBy===me?'<span class="chip red">قلت سكرو</span>':''}</div>
+      <div class="hand">${myHand}</div>
+      ${meP&&!out&&s.status==='playing'&&s.screwBy!==me&&s.discard.length&&!myPicksBusy(s)?'<div class="hint">اضغط على ورقتك تحرقها لو نفس ورقة الأرض</div>':''}
+      ${acts?`<div class="actions">${acts}</div>`:''}
+      ${out?`<button class="btn primary" data-a="rejoin">ارجع للعبة</button>`:''}
+    </div>`;
+
+  if(s.status==='reveal'||s.status==='over'){if(ui.sheet!=='exit'&&ui.sheet!=='rules')openResult(s)}
+  else if(ui.sheet==='result')closeSheet();
+}
+function oneEach(s){
+  const mine=ui.sel.filter(c=>c.p===me),oth=ui.sel.filter(c=>c.p!==me);
+  const opps=active(s).filter(p=>p.id!==me&&s.hands[p.id].some(c=>c!=null));
+  return !mine.length&&oth.length===opps.length&&oth.length>0;
+}
+function heelComplete(s){
+  const mine=ui.sel.filter(c=>c.p===me),oth=ui.sel.filter(c=>c.p!==me);
+  if(mine.length===2)return true;
+  const opps=active(s).filter(p=>p.id!==me&&s.hands[p.id].some(c=>c!=null));
+  return !mine.length&&oth.length===opps.length&&oth.length>0;
+}
+
+/* ---------- sheets ---------- */
+const sheet=document.getElementById('sheet'),sheetBox=document.getElementById('sheetBox');
+function openSheet(kind,html){ui.sheet=kind;sheetBox.innerHTML=html;sheet.hidden=false}
+function closeSheet(){ui.sheet=null;sheet.hidden=true;if(S&&(S.status==='reveal'||S.status==='over'))setTimeout(render,0)}
+sheet.addEventListener('click',e=>{if(e.target===sheet&&ui.sheet!=='result')closeSheet()});
+
+function openResult(s){
+  const r=s.result,over=s.status==='over';
+  let rows='';
+  if(r){
+    rows=[...s.players].sort((a,b)=>r.pts[a.id]-r.pts[b.id]).map(p=>{
+      return `<div class="r"><div class="line"><span class="grow">${esc(p.name)}</span>
+        ${p.id===r.caller?`<span class="chip red">${said(s,p.id)} سكرو</span>`:''}${p.id===r.caller&&r.thief&&r.thief.penalty!==false&&!r.thief.caught&&r.pts[p.id]!==r.totals[p.id]?'<span class="chip red">+10 الحرامي</span>':''}
+        ${r.totals[p.id]===r.min?'<span class="chip gold">أقل مجموع</span>':''}
+        <span class="note">المجموع ${r.totals[p.id]}</span><span class="pts">+${r.pts[p.id]}</span></div>
+        <div class="hand">${s.hands[p.id].filter(c=>c!=null).map(c=>faceHTML(c,'c-sm')).join('')||'<span class="note">ما عنده أوراق</span>'}</div></div>`}).join('');
+  }
+  const rounds=Math.max(0,...s.players.map(p=>(s.scores[p.id]||[]).length));
+  const board=rounds?`<h3>النقاط</h3><div class="board"><table><thead><tr><th>اللاعب</th>${Array.from({length:rounds},(_,i)=>`<th>ج${i+1}</th>`).join('')}<th>المجموع</th></tr></thead>
+    <tbody>${s.players.map(p=>`<tr><td>${esc(p.name)}${gone(s,p.id)?' (طلع)':''}</td>${(s.scores[p.id]||[]).map(x=>`<td>${x}</td>`).join('')}<td><b>${totalScore(s,p.id)}</b></td></tr>`).join('')}</tbody></table></div>`:'';
+  let foot='';
+  if(over){
+    const pool=active(s).length?active(s):s.players;
+    const best=Math.min(...pool.map(p=>totalScore(s,p.id)));
+    const winners=pool.filter(p=>totalScore(s,p.id)===best).map(p=>esc(p.name)).join(' و ');
+    foot=`<p class="pts" style="font-size:30px;text-align:center">الفائز: ${winners}</p>`+(s.hostId===me?`<button class="btn primary" data-a="toLobby">لعبة جديدة بنفس الشلة</button>`:`<p class="note">بانتظار صاحب اللعبة…</p>`)+`<button class="btn ghost" data-a="leaveNow">خروج</button>`;
+  }else foot=s.hostId===me?`<button class="btn primary" data-a="nextRound">الجولة ${s.round+1}</button><button class="btn" data-a="endGame">إنهاء اللعبة واحسب الفائز</button>`:`<p class="note">بانتظار صاحب اللعبة يبدأ الجولة الجاية أو ينهي اللعبة…</p><button class="btn ghost" data-a="exit">خروج</button>`;
+  const th=r&&r.thief?`<p class="note" style="font-size:15px">الحرامي كان ${esc(whereTxt(s,r.thief.where))}. ${esc(pname(s,r.caller))} خمّن ${esc(whereTxt(s,r.thief.guess))} ${r.thief.caught?'✓ صح':(r.thief.penalty?'✗ غلط، +10':'✗ غلط، بس الحرامي معه أصلاً وانحسب في مجموعه')}</p>`:'';
+  openSheet('result',`<h2>${over?'انتهت اللعبة':'نتيجة الجولة '+s.round}</h2>${th}${rows?`<div class="res">${rows}</div>`:''}${board}${foot}`);
+}
+
+function guessHTML(s){
+  const opts=active(s).map(p=>`<button class="btn" data-a="guess" data-k="p" data-p="${esc(p.id)}">${p.id===me?'معي أنا':'مع '+esc(p.name)}</button>`).join('');
+  return `<h2>سكرو! وين الحرامي؟</h2>
+  <p>خمّن وين كرت الحرامي. لو خمّنت غلط تنضاف لك 10 نقاط.</p>
+  <div class="actions">${opts}<button class="btn" data-a="guess" data-k="deck">في الكومة</button><button class="btn" data-a="guess" data-k="floor">في الأرض</button></div>
+  <button class="btn ghost" data-a="close">إلغاء</button>`;
+}
+function exitHTML(s){
+  const host=s.hostId===me,lobby=s.status==='lobby',playing=s.status==='playing';
+  return `<h2>خروج</h2>
+  <p>${lobby?'تطلع من غرفة الانتظار؟':'تطلع من اللعبة؟ أدوارك تتخطّى، وتقدر ترجع بنفس الرمز.'}</p>
+  <button class="btn danger" data-a="leaveNow">اطلع من اللعبة</button>
+  ${host&&!lobby?`<button class="btn" data-a="endGame">إنهاء اللعبة للكل</button>`:''}
+  ${host&&playing&&s.players[s.turn].id!==me?`<button class="btn" data-a="skipTurn">تخطّي دور ${esc(s.players[s.turn].name)}</button><p class="note">لو أحد علّق أو راح عنه النت.</p>`:''}
+  <button class="btn ghost" data-a="close">إلغاء</button>`;
+}
+
+function rulesHTML(){
+  const ex=(t,l)=>{const id=DECK.indexOf(t);return `<div>${faceHTML(id,'c-sm')}<span>${l}</span></div>`};
+  return `<h2>قواعد سكرو</h2>
+  <p>الهدف: أقل مجموع نقاط في آخر الجولة.</p>
+  <h3>البداية</h3>
+  <ul><li>كل لاعب ياخذ ${RULES.handSize} أوراق مقلوبة.</li><li>تشوف ورقتك 1 و 2 مرة وحدة، واحفظها.</li></ul>
+  <h3>دورك</h3>
+  <ul><li>اسحب ورقة من الكومة. تقدر تبدّلها بأي ورقة من أوراقك، والقديمة تنرمي على الأرض. أو ارمها، ولو كانت ورقة أمر تستخدم أمرها.</li>
+  <li>أو خذ آخر ورقة من الأرض، وبدّلها بورقة من أوراقك. ورقة الأرض ما تشغّل أمرها.</li>
+  <li>+20 والسكرو الأحمر ما تقدر تحتفظ فيهم لو سحبتهم، وما تقدر تاخذهم من الأرض.</li></ul>
+  <h3>الرمي المطابق</h3>
+  <ul><li>أي وقت، لو عندك ورقة نفس ورقة الأرض، احرقها وتخلص منها.</li><li>لو حرقت في بداية دورك بدل السحب، دورك يخلص ويروح للي بعدك.</li><li>لو رميت غلط تاخذ ورقة عقوبة زيادة.</li></ul>
+  <h3>أوراق الأوامر</h3>
+  <div class="cardref">${ex('n7','7 و 8: شوف ورقة منك')}${ex('n9','9 و 10: شوف ورقة أي لاعب')}${ex('swap','خد وهات: بدّل ورقة منك مع لاعب بدون ما تشوف')}${ex('take','خد بس: أعطِ ورقة منك للاعب')}${ex('heel','كعب داير: ورقتين منك أو ورقة من كل لاعب')}${ex('basra','بصرة: احرق ورقة منك')}${ex('seeswap','شوف ورقة من كل لاعب، وبدّل مع ورقة منك أو بينهم')}${ex('free','على كيفك: اختر أي أمر')}</div>
+  <h3>قيم الأوراق</h3>
+  <div class="cardref">${ex('m1','-1')}${ex('gs','0')}${ex('n5','نفس الرقم')}${ex('p20','20')}${ex('rs','25')}${ex('thief','الحرامي: 10')}</div>
+  <p class="note">أوراق الأوامر قيمتها 10 لو بقت معك.</p>
+  <h3>الكوتشينة (61 ورقة)</h3>
+  <ul><li>1 إلى 10: أربع من كل رقم.</li><li>خد وهات و+20: أربع من كل وحدة.</li><li>بصرة، كعب داير، سكرو أخضر، سكرو أحمر: ثنتين من كل وحدة.</li><li>خد بس، See &amp; Swap، على كيفك، الحرامي، -1: وحدة من كل وحدة.</li></ul>
+  <h3>سكرو</h3>
+  <ul><li>بداية دورك، بعد ${RULES.minLaps} لفّات، تقدر تقول سكرو بدل السحب.</li>
+  <li>كل واحد ياخذ دور أخير، وأوراقك مقفولة ما أحد يبدّل معها.</li>
+  <li>لما تقول سكرو لازم تخمّن وين الحرامي: مع أي لاعب، أو في الكومة، أو في الأرض. لو خمّنت غلط تنضاف لك 10، إلا لو الحرامي معك لأنه محسوب في مجموعك.</li>
+  <li>بعدها تنكشف الأوراق، وكل واحد ياخذ مجموع أوراقه.</li>
+  <li>بعد آخر جولة، صاحب أقل نقاط يفوز.</li></ul>
+  <button class="btn primary" data-a="close">تمام</button>`;
+}
+
+/* ---------- events ---------- */
+/* ---------- zoom ---------- */
+const zoomEl=document.getElementById('zoom');let zoomT;
+function showZoom(ids,label,ms){
+  const sz=ids.length>1?'c-xl2':'c-xl';
+  zoomEl.innerHTML=`<div class="lbl">${esc(label||'')}</div><div class="cards">${ids.map(id=>faceHTML(id,sz)).join('')}</div><div class="hint">اضغط في أي مكان للإغلاق</div>`;
+  zoomEl.hidden=false;clearTimeout(zoomT);if(ms)zoomT=setTimeout(hideZoom,ms);
+}
+function hideZoom(){zoomEl.hidden=true;clearTimeout(zoomT)}
+function zoomFace(el){const id=+el.dataset.face;if(Number.isFinite(id))showZoom([id],el.dataset.label||'',0)}
+let lpT=null;
+document.addEventListener('pointerdown',e=>{
+  const f=e.target.closest('[data-face]');clearTimeout(lpT);if(!f)return;
+  lpT=setTimeout(()=>{ui.suppressClick=true;zoomFace(f);setTimeout(()=>ui.suppressClick=false,900)},450);
+},{passive:true});
+['pointerup','pointercancel','scroll'].forEach(ev=>document.addEventListener(ev,()=>clearTimeout(lpT),{passive:true,capture:true}));
+document.addEventListener('contextmenu',e=>{if(e.target.closest('[data-face]'))e.preventDefault()});
+
+/* swipe the drawn card toward the floor to throw it */
+let drag=null;
+document.addEventListener('pointerdown',e=>{
+  const z=e.target.closest('.drawn-zone.swipe');
+  if(!z||!S||!isTurn(S,me)||S.phase!=='drawn'||S.drawnFrom==='discard'||ui.mode==='throw')return;
+  const card=z.querySelector('.card');if(!card)return;
+  const fl=app.querySelector('[data-zone="discard"]');
+  const cr=card.getBoundingClientRect(),fr=fl?fl.getBoundingClientRect():null;
+  const cx=cr.left+cr.width/2,fx=fr?fr.left+fr.width/2:cx-150;
+  drag={x:e.clientX,y:e.clientY,card,dir:fx<cx?-1:1,dist:Math.abs(fx-cx)||150,moved:false,id:e.pointerId,last:e.clientX};
+  try{z.setPointerCapture(e.pointerId)}catch(err){}
+});
+document.addEventListener('pointermove',e=>{
+  if(!drag||e.pointerId!==drag.id)return;
+  const dx=e.clientX-drag.x,dy=e.clientY-drag.y;drag.last=e.clientX;
+  if(!drag.moved&&Math.hypot(dx,dy)>8){drag.moved=true;clearTimeout(lpT)}
+  if(drag.moved){drag.card.style.transition='none';drag.card.style.transform=`translate(${dx}px,${dy*.3}px) rotate(${dx*.06}deg)`}
+});
+document.addEventListener('pointerup',e=>{
+  if(!drag||e.pointerId!==drag.id)return;
+  const d=drag;drag=null;if(!d.moved)return;
+  ui.suppressClick=true;setTimeout(()=>ui.suppressClick=false,400);
+  const dx=e.clientX-d.x;
+  if(dx*d.dir>Math.min(60,d.dist*.35))commit('discardDrawn');
+  else{d.card.style.transition='transform .2s';d.card.style.transform=''}
+});
+document.addEventListener('pointercancel',()=>{if(drag){drag.card.style.transition='transform .2s';drag.card.style.transform='';drag=null}});
+
+document.addEventListener('click',async e=>{
+  if(ui.suppressClick){ui.suppressClick=false;return}
+  if(e.target.closest('#zoom')){hideZoom();return}
+  const slot=e.target.closest('.slot[data-p]');
+  if(slot){if(slot.classList.contains('can'))onCard(slot.dataset.p,+slot.dataset.s);else if(slot.classList.contains('tt'))burn(+slot.dataset.s);else if(slot.dataset.face)zoomFace(slot);return}
+  const b=e.target.closest('[data-a]');
+  if(b&&b.dataset.zone==='discard'&&!b.classList.contains('can')){if(b.dataset.face)zoomFace(b);return}
+  if(!b||b.disabled){const f=e.target.closest('[data-face]');if(f)zoomFace(f);return}
+  const a=b.dataset.a;
+  switch(a){
+    case 'create':return createGame();
+    case 'join':return joinGame();
+    case 'rules':return openSheet('rules',rulesHTML());
+    case 'exit':return openSheet('exit',exitHTML(S));
+    case 'close':return closeSheet();
+    case 'sound':SFX.on=!SFX.on;lsSet('skrew.sound',SFX.on?'on':'off');if(SFX.on)play('flip');return render();
+    case 'copy':{const t=S?.code||'';try{await navigator.clipboard.writeText(t);toast('انسخ الرمز')}catch(err){const r=document.createRange();r.selectNodeContents(document.getElementById('codeTxt'));const sl=getSelection();sl.removeAllRanges();sl.addRange(r);toast('الرمز محدد، انسخه')}return}
+    case 'leaveNow':{closeSheet();if(S&&!gone(S,me)&&S.status!=='over')await commit('quit');leaveLocal();return}
+    case 'endGame':closeSheet();return commit('endGame');
+    case 'rejoin':{const name=S.players.find(p=>p.id===me)?.name||lsGet('skrew.name')||'لاعب';return commit('join',{name})}
+    case 'rounds':return commit('rounds',{n:+b.dataset.n});
+    case 'start':return commit('start');
+    case 'ready':try{navigator.wakeLock?.request('screen').catch(()=>{})}catch(err){}return commit('ready');
+    case 'draw':return commit('draw');
+    case 'takeFloor':return commit('takeFloor');
+    case 'screw':return openSheet('guess',guessHTML(S));
+    case 'guess':{closeSheet();const g=b.dataset.k==='p'?{k:'p',p:b.dataset.p}:{k:b.dataset.k};return commit('screw',{guess:g})}
+    case 'discard':return commit('discardDrawn');
+    case 'skip':return commit('skipAction');
+    case 'throwMode':ui.mode=ui.mode==='throw'?null:'throw';ui.sel=[];return render();
+    case 'confirm':return confirmAction();
+    case 'setG':{const nm=document.getElementById('nm')?.value;if(nm!=null)lsSet('skrew.name',nm.trim().slice(0,14));lsSet('skrew.g',b.dataset.g);return renderHome()}
+    case 'choose':return commit('chooseCmd',{type:b.dataset.t});
+    case 'keepMode':ui.keepMode=true;return render();
+    case 'keepBack':ui.keepMode=false;return render();
+    case 'seeReveal':return seeReveal();
+    case 'seeMine':ui.seeSwapMode='mine';ui.pick=[];return render();
+    case 'seeBetween':ui.seeSwapMode='between';ui.pick=[];return render();
+    case 'seeBack':ui.seeSwapMode=null;ui.pick=[];return render();
+    case 'seeNo':return commit('resolve',{sel:ui.sel,mode:null});
+    case 'skipTurn':closeSheet();return commit('skipTurn');
+    case 'nextRound':closeSheet();return commit('nextRound');
+    case 'toLobby':closeSheet();return commit('toLobby');
+  }
+});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='jc')joinGame();if(e.key==='Enter'&&e.target.id==='nm')createGame()});
+
+function seeReveal(){const ids=ui.sel.map(c=>S.hands[c.p][c.s]);const now=Date.now();ids.forEach(id=>{ui.reveals[id]=now+600000;ui.revealAt[id]=now});ui.seeStep=1;play('flip');render();showZoom(ids,'See & Swap',RULES.revealMs)}
+async function burn(i){const r=await commit('throwCard',{slot:i});if(r?.wrong)toast('حرق غلط! أخذت ورقة عقوبة')}
+async function onCard(pid,i){
+  const s=S;if(!s)return;
+  if(ui.mode==='throw'){ui.mode=null;const r=await commit('throwCard',{slot:i});if(r?.wrong)toast('رمية غلط! أخذت ورقة عقوبة');return}
+  if(!isTurn(s,me))return;
+  if(s.phase==='drawn'){
+    const f=info(T(s.drawn));
+    if(f.cmd&&s.drawnFrom!=='discard'&&!ui.keepMode){const r=await commit('discardDrawn');if(r&&S.phase==='action')return onCard(pid,i);return}
+    return commit('keep',{slot:i});
+  }
+  if(s.phase!=='action')return;
+  const t=s.action.type,cell={p:pid,s:i},id=s.hands[pid][i];
+  const lbl=c=>c.p===me?`ورقتك رقم ${c.s+1}`:`ورقة ${pname(s,c.p)} رقم ${c.s+1}`;
+  if(t==='peekSelf'||t==='peekOther'){const r=await commit('resolve',{sel:[cell]});if(r){reveal([id]);render();showZoom([id],lbl(cell),RULES.revealMs)}return}
+  if(t==='basra')return commit('resolve',{sel:[cell]});
+  if(t==='swap'){ui.sel=ui.sel.filter(c=>(c.p===me)!==(pid===me));ui.sel.push(cell);return render()}
+  if(t==='heel'){
+    const at=ui.sel.findIndex(c=>c.p===pid&&c.s===i);
+    if(at>=0)ui.sel.splice(at,1);
+    else if(pid===me){if(ui.sel.filter(c=>c.p===me).length<2)ui.sel.push(cell)}
+    else{ui.sel=ui.sel.filter(c=>c.p!==pid);ui.sel.push(cell)}
+    if(heelComplete(s))return confirmAction();
+    return render();
+  }
+  if(t==='take'){
+    if(pid===me){ui.sel=[cell];return render()}
+    if(!ui.sel.length)return;
+    return commit('resolve',{sel:ui.sel,to:pid});
+  }
+  if(t==='seeswap'){
+    if(ui.seeStep===0){const at=ui.sel.findIndex(c=>c.p===pid&&c.s===i);if(at>=0)ui.sel.splice(at,1);else{ui.sel=ui.sel.filter(c=>c.p!==pid);ui.sel.push(cell)}if(oneEach(s))return seeReveal();return render()}
+    if(ui.seeSwapMode==='mine'){
+      if(!ui.pick.length){ui.pick=[cell];return render()}
+      if(pid===me)return commit('resolve',{sel:ui.sel,mode:'mine',a:ui.pick[0],mine:i});
+    }
+    if(ui.seeSwapMode==='between'){
+      const at=ui.pick.findIndex(c=>c.p===pid&&c.s===i);
+      if(at>=0)ui.pick.splice(at,1);else ui.pick.push(cell);
+      if(ui.pick.length===2)return commit('resolve',{sel:ui.sel,mode:'between',a:ui.pick[0],b:ui.pick[1]});
+      return render();
+    }
+  }
+}
+async function confirmAction(){
+  const s=S,t=s.action?.type;
+  const ids=ui.sel.map(c=>s.hands[c.p][c.s]);
+  const r=await commit('resolve',{sel:ui.sel});
+  if(r&&t==='heel'){reveal(ids);render();showZoom(ids,'كعب داير',RULES.revealMs+1000)}
+}
+
+/* ---------- home actions ---------- */
+function myG(){return lsGet('skrew.g')==='m'?'m':(lsGet('skrew.g')==='f'?'f':'')}
+function readName(){return (document.getElementById('nm')?.value||lsGet('skrew.name')||'').trim().slice(0,14)}
+const CODE_CH='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+async function createGame(){
+  if(ui.creating)return;
+  const name=readName();if(!name){renderHome('اكتب اسمك أول');return}
+  if(!myG()){lsSet('skrew.name',name);renderHome('اختر بنت أو ولد');return}
+  lsSet('skrew.name',name);ui.creating=true;
+  try{
+    let c;for(let i=0;i<6;i++){c=Array.from({length:4},()=>CODE_CH[Math.floor(Math.random()*CODE_CH.length)]).join('');const sn=await get(ref(db,'games/'+c));if(!sn.exists())break}
+    const s={code:c,hostId:me,status:'lobby',players:[{id:me,name,g:myG()||'m'}],rounds:5,round:0,scores:{},left:{},log:[],logSeq:0,rev:1,created:Date.now()};
+    await set(ref(db,'games/'+c),{s:JSON.stringify(s),rev:1});watch(c);
+  }catch(e){renderHome(String(e?.code||e?.message||'').toUpperCase().includes('PERMISSION')?'قاعدة البيانات رافضة الكتابة. تأكد من قواعد Firebase.':'ما قدرنا ننشئ اللعبة، تأكد من الإنترنت وجرّب مرة ثانية')}
+  finally{ui.creating=false}
+}
+async function joinGame(){
+  const name=readName();const c=(document.getElementById('jc')?.value||'').trim().toUpperCase();
+  if(!name){renderHome('اكتب اسمك أول');return}
+  if(!myG()){lsSet('skrew.name',name);renderHome('اختر بنت أو ولد');return}
+  if(c.length!==4){ui.homeErr='الرمز 4 حروف';renderHome();return}
+  lsSet('skrew.name',name);ui.homeErr='';
+  try{
+    const sn=await get(ref(db,'games/'+c));
+    if(!sn.exists()){ui.homeErr='ما لقينا لعبة بهذا الرمز';renderHome();return}
+    const d=JSON.parse(sn.val().s);
+    if(!d.players.some(p=>p.id===me)&&d.status!=='lobby'){ui.homeErr='اللعبة بدأت، اطلب منهم يرجعون للانتظار';renderHome();return}
+    code=c;gameRef=ref(db,'games/'+c);
+    const r=await commit('join',{name,g:myG()||'m'});if(!r){gameRef=null;code=null;renderHome();return}
+    watch(c);
+  }catch(e){ui.homeErr='ما قدرنا ندخل، تأكد من الإنترنت وجرّب مرة ثانية';renderHome()}
+}
+
+/* ---------- boot ---------- */
+(async function boot(){
+  if(!FIREBASE_CONFIG){blocked('التطبيق جاهز، بس ناقصه إعدادات Firebase.');return}
+  try{db=getDatabase(initializeApp(FIREBASE_CONFIG))}catch(e){blocked('إعدادات Firebase غير صحيحة.');return}
+  me=lsGet('skrew.pid');
+  if(!me){me='p'+Math.random().toString(36).slice(2,10)+Date.now().toString(36);lsSet('skrew.pid',me)}
+  const saved=lsGet('skrew.code');
+  if(saved){
+    try{const sn=await get(ref(db,'games/'+saved));if(sn.exists()&&JSON.parse(sn.val().s).players.some(p=>p.id===me)){watch(saved);return}}catch(e){}
+    lsSet('skrew.code',null);
+  }
+  renderHome();
+})();
+</script>
+</body>
+</html>
