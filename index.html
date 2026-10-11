@@ -193,6 +193,11 @@ input.code{text-transform:uppercase;letter-spacing:.25em;text-align:center;font-
 .card.flipin{animation:flipin .38s ease-out}
 @keyframes flipin{0%{transform:rotateY(90deg)}100%{transform:rotateY(0)}}
 
+/* new paper card art */
+.card.kc{background:transparent;border:0;overflow:visible;border-radius:calc(var(--w)*.072);box-shadow:0 2px 7px var(--shadow)}
+.card.kc::before,.card.kc::after{display:none}
+.card.kc>svg{width:100%;height:100%;display:block}
+.c-xs .kgr,.c-op .kgr,.c-side .kgr,.c-sm .kgr{display:none}
 .slot{appearance:none;background:none;border:0;padding:0;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:default;transition:transform .15s;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 [data-face]{cursor:zoom-in;-webkit-touch-callout:none}
 .slot .n{font-size:11px;font-weight:800;color:var(--muted);line-height:1}
@@ -791,20 +796,103 @@ const IC={
   free:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>'
 };
 const svg=(k,cls='ico')=>`<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]}</svg>`;
-function backHTML(sz){return `<div class="card back ${sz}"><span class="bk">سكرو</span></div>`}
-function faceHTML(id,sz){
-  const t=T(id),f=info(t);
-  const idx=l=>`<span class="idx">${l}</span><span class="idx b">${l}</span>`;
-  const card=(cls,hue,on,inner)=>`<div class="card face ${cls} ${sz}" style="--hue:${hue};--on:${on||hue}">${inner}</div>`;
-  if(f.kind==='num')return card('k-num',C.navy,'',`${idx(f.v)}<span class="ring"><span class="big">${f.v}</span></span>`);
-  if(f.kind==='self'||f.kind==='other')return card('k-'+f.kind,C.teal,'',`${idx(f.v)}<span class="ring"><span class="big">${f.v}</span></span><span class="tag">${f.kind==='self'?'شوف ورقتك':'شوف ورقة غيرك'}</span>`);
-  if(f.kind==='p20')return card('solid k-wide',C.red,'#a4f0d6',`${idx('20')}<span class="big">+20</span>`);
-  if(f.kind==='m1')return card('solid k-wide',C.green,'#ffd34d',`${idx('-1')}<span class="big">-1</span>`);
-  if(f.kind==='gs')return card('solid k-screw',C.green,'#ffffff',`${idx('0')}<i class="screw"></i><span class="ttlc">سكرو</span>`);
-  if(f.kind==='rs')return card('solid k-screw',C.red,'#ffffff',`${idx('25')}<i class="screw"></i><span class="ttlc">سكرو</span>`);
-  if(f.kind==='thief')return card('k-cmd',C.navy,'',`${idx('10')}${svg('thief')}<span class="ttlc">الحرامي</span>`);
-  return card('k-cmd',C.navy,'',`${idx('10')}${svg(f.cmd)}<span class="ttlc">${CMD_NAME[f.cmd]}</span>`);
+/* ===== سكرو deck: original SVG card art ===== */
+const K={navy:'#25225e',teal:'#0d7a72',sea:'#145e86',red:'#bf3227',green:'#1f7f47',ink:'#1c1a2c',gold:'#c8962c',gold2:'#f2cf73',paper:'#fbf6ea',paper2:'#efe5cf'};
+function star8(cx,cy,r,attrs){const a=r*.7071,pts=[];for(let i=0;i<16;i++){const ang=Math.PI/8*i-Math.PI/2,rr=i%2?r*.62:r;pts.push((cx+rr*Math.cos(ang)).toFixed(1)+','+(cy+rr*Math.sin(ang)).toFixed(1))}return `<polygon points="${pts.join(' ')}" ${attrs||''}/>`}
+const CARD_DEFS=`<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<filter id="kgrain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="7" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 .35  0 0 0 0 .28  0 0 0 0 .18  0 0 0 .55 0"/><feComposite in2="SourceGraphic" operator="in"/></filter>
+<linearGradient id="kpaper" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fffdf6"/><stop offset=".6" stop-color="${K.paper}"/><stop offset="1" stop-color="#f1e7d2"/></linearGradient>
+<linearGradient id="kgold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe7a3"/><stop offset=".45" stop-color="#e2ad45"/><stop offset="1" stop-color="#9b6a1e"/></linearGradient>
+<linearGradient id="ksteel" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8d8f99"/><stop offset=".45" stop-color="#f4f5f8"/><stop offset="1" stop-color="#7c7e88"/></linearGradient>
+<radialGradient id="kvig" cx=".5" cy=".45" r=".75"><stop offset=".7" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#5a3a10" stop-opacity=".12"/></radialGradient>
+<pattern id="kback" width="40" height="40" patternUnits="userSpaceOnUse"><rect width="40" height="40" fill="#3b2233"/>${star8(20,20,13,'fill="none" stroke="#c8962c" stroke-width="1.4" opacity=".75"')}${star8(0,0,9,'fill="#4d2d42" stroke="#9b6a1e" stroke-width="1"')}${star8(40,0,9,'fill="#4d2d42" stroke="#9b6a1e" stroke-width="1"')}${star8(0,40,9,'fill="#4d2d42" stroke="#9b6a1e" stroke-width="1"')}${star8(40,40,9,'fill="#4d2d42" stroke="#9b6a1e" stroke-width="1"')}<circle cx="20" cy="20" r="2.4" fill="#e2ad45"/></pattern>
+</defs></svg>`;
+/* ---- illustrations, drawn in a 120x120 box centred at (125,160) ---- */
+const miniCard=(x,y,rot,c,fill)=>`<g transform="translate(${x} ${y}) rotate(${rot})"><rect x="-17" y="-24" width="34" height="48" rx="5" fill="${fill||K.paper}" stroke="${c}" stroke-width="3"/><rect x="-11" y="-18" width="22" height="36" rx="3" fill="none" stroke="${c}" stroke-width="1.2" opacity=".5"/></g>`;
+const arrowHead=(x,y,ang,c,s)=>`<path d="M0 0 L${-s} ${-s*.6} L${-s} ${s*.6}Z" fill="${c}" transform="translate(${x} ${y}) rotate(${ang})"/>`;
+const ILL={
+ swap:c=>`${miniCard(103,165,-12,c)}${miniCard(147,155,12,c,K.paper2)}
+  <path d="M92 118 Q125 92 158 112" fill="none" stroke="${K.gold}" stroke-width="6" stroke-linecap="round"/>${arrowHead(160,113,32,K.gold,11)}
+  <path d="M158 206 Q125 230 92 210" fill="none" stroke="${K.gold}" stroke-width="6" stroke-linecap="round"/>${arrowHead(90,209,212,K.gold,11)}`,
+ take:c=>`${miniCard(150,162,10,c)}<path d="M128 166 C112 166 104 150 88 150" fill="none" stroke="${K.gold}" stroke-width="7" stroke-linecap="round"/>${arrowHead(84,150,180,K.gold,13)}
+  <path d="M70 196 q-6-30 14-34 q8-2 10 6 l2 10 q12-4 14 6 q8-2 9 8 q8 0 7 10 l-2 22 q-2 10-14 10 h-20 q-12 0-16-12z" fill="${K.paper2}" stroke="${c}" stroke-width="3" stroke-linejoin="round"/>`,
+ heel:c=>`<circle cx="125" cy="162" r="44" fill="none" stroke="${K.gold}" stroke-width="5" stroke-dasharray="10 9"/>${arrowHead(160,135,52,K.gold,12)}
+  ${miniCard(125,110,0,c)}${miniCard(177,162,90,c)}${miniCard(125,214,0,c)}${miniCard(73,162,90,c)}<circle cx="125" cy="162" r="10" fill="${K.gold}"/>`,
+ basra:c=>`${miniCard(125,180,-6,c)}
+  <path d="M125 92 C150 118 166 132 160 160 C156 182 140 194 125 194 C108 194 92 182 90 162 C88 144 100 134 106 122 C110 140 118 146 122 146 C118 128 116 110 125 92Z" fill="#e8512b" stroke="#8d1f12" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M125 128 C138 144 146 154 142 168 C139 180 132 186 125 186 C116 186 108 178 108 168 C108 156 116 152 120 146 C122 156 126 158 128 158 C126 148 122 140 125 128Z" fill="${K.gold2}"/>`,
+ seeswap:c=>`<path d="M80 122 Q125 84 170 122 Q125 160 80 122Z" fill="${K.paper2}" stroke="${c}" stroke-width="4" stroke-linejoin="round"/><circle cx="125" cy="122" r="14" fill="${c}"/><circle cx="130" cy="117" r="4" fill="#fff"/>
+  ${miniCard(98,190,-10,c)}${miniCard(152,190,10,c,K.paper2)}
+  <path d="M112 176 h26" stroke="${K.gold}" stroke-width="5" stroke-linecap="round"/>${arrowHead(141,176,0,K.gold,9)}<path d="M138 200 h-26" stroke="${K.gold}" stroke-width="5" stroke-linecap="round"/>${arrowHead(109,200,180,K.gold,9)}`,
+ free:c=>`${miniCard(98,172,-22,c)}${miniCard(152,172,22,c)}${miniCard(125,164,0,c,K.paper2)}
+  ${star8(125,164,15,`fill="${K.gold}" stroke="${c}" stroke-width="2"`)}
+  ${star8(84,112,9,`fill="${K.gold2}"`)}${star8(170,106,7,`fill="${K.gold2}"`)}${star8(176,210,6,`fill="${K.gold2}"`)}`,
+ thief:c=>`<path d="M74 118 Q125 96 176 118 L168 132 Q125 116 82 132Z" fill="${c}"/><ellipse cx="125" cy="116" rx="34" ry="12" fill="${c}"/>
+  <path d="M66 154 Q125 132 184 154 Q186 178 160 182 Q140 184 130 170 Q125 164 120 170 Q110 184 90 182 Q64 178 66 154Z" fill="${c}"/>
+  <ellipse cx="98" cy="160" rx="12" ry="8" fill="${K.paper}"/><ellipse cx="152" cy="160" rx="12" ry="8" fill="${K.paper}"/><circle cx="100" cy="161" r="4" fill="${c}"/><circle cx="150" cy="161" r="4" fill="${c}"/>
+  <path d="M184 154 q14 2 18 14 M184 160 q10 8 8 20" fill="none" stroke="${c}" stroke-width="4" stroke-linecap="round"/>
+  <path d="M106 206 Q125 216 144 206" fill="none" stroke="${c}" stroke-width="4" stroke-linecap="round"/>`,
+ screw:c=>`<g transform="rotate(-18 125 165)"><rect x="93" y="96" width="64" height="22" rx="9" fill="url(#kgold)" stroke="#6b4a14" stroke-width="2.5"/><rect x="121" y="99" width="8" height="16" rx="2" fill="#6b4a14"/>
+  <path d="M108 118 H142 L138 206 L125 236 L112 206Z" fill="url(#ksteel)" stroke="#555" stroke-width="2.5" stroke-linejoin="round"/>
+  ${[0,1,2,3,4,5].map(i=>`<path d="M${109+i*.6} ${128+i*14} L${141-i*.6} ${120+i*14}" stroke="#555" stroke-width="3" stroke-linecap="round"/>`).join('')}</g>`,
+ eye:c=>`<path d="M100 74 Q125 56 150 74 Q125 92 100 74Z" fill="${K.paper2}" stroke="${c}" stroke-width="3"/><circle cx="125" cy="74" r="7" fill="${c}"/>`,
+ eyeout:c=>`<path d="M96 74 Q118 56 140 74 Q118 92 96 74Z" fill="${K.paper2}" stroke="${c}" stroke-width="3"/><circle cx="118" cy="74" r="6" fill="${c}"/><path d="M146 80 L160 66" stroke="${c}" stroke-width="3.5" stroke-linecap="round"/>${arrowHead(162,64,-45,c,7)}`
+};
+const CARD_META={
+ swap:{c:K.navy,v:'10',t:'خد وهات',ill:'swap'}, take:{c:K.navy,v:'10',t:'خد بس',ill:'take'}, heel:{c:K.navy,v:'10',t:'كعب داير',ill:'heel'},
+ basra:{c:K.navy,v:'10',t:'بصرة',ill:'basra'}, seeswap:{c:K.navy,v:'10',t:'شوف وبدّل',ill:'seeswap'}, free:{c:K.navy,v:'10',t:'على كيفك',ill:'free'},
+ thief:{c:K.ink,v:'10',t:'الحرامي',ill:'thief'}, gs:{c:K.green,v:'0',t:'سكرو',ill:'screw',solid:1}, rs:{c:K.red,v:'25',t:'سكرو',ill:'screw',solid:1},
+ p20:{c:K.red,v:'20',t:'ارمها!',big:'+20',solid:1}, m1:{c:K.green,v:'-1',t:'ناقص واحد',big:'-1',solid:1}
+};
+function frame(c,solid){
+  const ink=solid?'#fff':c;
+  return `<rect x="0" y="0" width="250" height="350" rx="18" fill="url(#kpaper)"/>
+  ${solid?`<rect x="10" y="10" width="230" height="330" rx="12" fill="${c}"/><rect x="10" y="10" width="230" height="330" rx="12" fill="url(#kvig)"/>`:''}
+  <rect class="kgr" x="0" y="0" width="250" height="350" rx="18" fill="#fff" filter="url(#kgrain)" opacity="${solid?.25:.6}"/>
+  <rect x="12" y="12" width="226" height="326" rx="11" fill="none" stroke="${ink}" stroke-width="3.2"/>
+  <rect x="19" y="19" width="212" height="312" rx="7" fill="none" stroke="${ink}" stroke-width="1.2" opacity=".55"/>
+  ${[[19,19],[231,19],[19,331],[231,331]].map(([x,y])=>star8(x,y,7,`fill="${solid?K.gold2:c}" stroke="${solid?c:K.paper}" stroke-width="1.5"`)).join('')}`;
 }
+function corners(v,c,solid){
+  const ink=solid?'#fff':c,fs=v.length>2?26:v.length>1?32:38;
+  const num=`<text x="0" y="0" font-family="Lalezar,Tajawal,sans-serif" font-size="${fs}" fill="${ink}" text-anchor="middle" dominant-baseline="central" direction="ltr" unicode-bidi="bidi-override">${v}</text>`,st=y=>star8(0,y,5.5,`fill="${solid?K.gold2:K.gold}"`);
+  return `<g transform="translate(208 50)">${num}${st(26)}</g><g transform="translate(42 300)">${num}${st(-26)}</g>`;
+}
+function ribbon(text,c,solid){
+  const fill=solid?K.paper:c,txt=solid?c:'#fff';
+  return `<path d="M64 250 H186 L178 266 L186 282 H64 L72 266Z" fill="${fill}" stroke="${solid?K.gold2:K.gold}" stroke-width="2"/>
+  <text x="125" y="267" font-family="Tajawal,sans-serif" font-weight="800" font-size="${text.length>11?14:17}" fill="${txt}" text-anchor="middle" dominant-baseline="central">${text}</text>`;
+}
+function medallion(n,c){
+  return `${star8(125,165,86,`fill="${c}" opacity=".08"`)}${star8(125,165,78,`fill="none" stroke="${c}" stroke-width="2.4"`)}
+  <circle cx="125" cy="165" r="54" fill="${K.paper}" stroke="${c}" stroke-width="3.5"/><circle cx="125" cy="165" r="47" fill="none" stroke="${c}" stroke-width="1.2" opacity=".5"/>
+  <text x="125" y="170" font-family="Lalezar,Tajawal,sans-serif" font-size="${n>=10?74:88}" fill="${c}" text-anchor="middle" dominant-baseline="central">${n}</text>`;
+}
+function cardSVG(t){
+  const body=(inner)=>`<svg class="kcard" viewBox="0 0 250 350" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
+  if(t==='back')return body(`<rect x="0" y="0" width="250" height="350" rx="18" fill="#2a1824"/><rect x="10" y="10" width="230" height="330" rx="12" fill="url(#kback)"/>
+    <rect x="10" y="10" width="230" height="330" rx="12" fill="none" stroke="${K.gold}" stroke-width="4"/><rect x="18" y="18" width="214" height="314" rx="8" fill="none" stroke="${K.gold}" stroke-width="1.2" opacity=".7"/>
+    <ellipse cx="125" cy="175" rx="72" ry="44" fill="#2a1824" stroke="url(#kgold)" stroke-width="5"/>
+    <text x="125" y="180" font-family="Lalezar,Tajawal,sans-serif" font-size="52" fill="url(#kgold)" text-anchor="middle" dominant-baseline="central" transform="rotate(-14 125 175)">سكرو</text>`);
+  if(t[0]==='n'){
+    const n=+t.slice(1),c=n<=6?K.navy:n<=8?K.teal:K.sea;
+    let extra='';
+    if(n<=6){const w=(n-1)*24;extra=Array.from({length:n},(_,i)=>star8(125-w/2+i*24,268,8,`fill="${c}"`)).join('')}
+    else extra=ILL[n<=8?'eye':'eyeout'](c)+ribbon(n<=8?'شوف ورقتك':'شوف ورقة غيرك',c);
+    return body(frame(c)+medallion(n,c)+corners(String(n),c)+extra);
+  }
+  const m=CARD_META[t];
+  let mid;
+  if(m.big)mid=`${star8(125,160,92,`fill="${K.paper}" opacity=".12"`)}${star8(125,160,80,`fill="none" stroke="${K.paper}" stroke-width="2.5" opacity=".8"`)}
+    <circle cx="125" cy="160" r="60" fill="${K.paper}" stroke="${K.gold2}" stroke-width="4"/>
+    <text x="125" y="166" font-family="Lalezar,Tajawal,sans-serif" font-size="${m.big.length>2?58:70}" fill="${m.c}" text-anchor="middle" dominant-baseline="central" direction="ltr" unicode-bidi="bidi-override">${m.big}</text>`;
+  else mid=(m.solid?`<circle cx="125" cy="164" r="76" fill="${K.paper}" opacity=".95" stroke="${K.gold2}" stroke-width="4"/>`:`<circle cx="125" cy="164" r="80" fill="${m.c}" opacity=".06"/><circle cx="125" cy="164" r="80" fill="none" stroke="${m.c}" stroke-width="1.6" stroke-dasharray="3 5"/>`)+ILL[m.ill](m.solid?K.ink:m.c);
+  return body(frame(m.c,m.solid)+mid+corners(m.v,m.c,m.solid)+ribbon(m.t,m.c,m.solid));
+}
+
+document.body.insertAdjacentHTML('afterbegin',CARD_DEFS);
+function backHTML(sz){return `<div class="card kc kback ${sz}">${cardSVG('back')}</div>`}
+function faceHTML(id,sz){return `<div class="card face kc ${sz}">${cardSVG(T(id))}</div>`}
 
 /* ---------- rendering ---------- */
 const app=document.getElementById('app');
