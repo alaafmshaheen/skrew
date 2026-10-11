@@ -85,7 +85,11 @@ input.code{text-transform:uppercase;letter-spacing:.25em;text-align:center;font-
 
 .opps{display:flex;flex-direction:column;gap:8px}
 .opp{display:flex;align-items:center;gap:10px;background:color-mix(in srgb,var(--rail),transparent 45%);border:1px solid var(--line);border-radius:14px;padding:8px 10px;transition:border-color .2s,box-shadow .2s}
-.opp.turn,.me.turn{border-color:var(--brass);box-shadow:0 0 0 2px color-mix(in srgb,var(--brass),transparent 55%)}
+.opp.turn,.me.turn{border-color:var(--brass-2);box-shadow:0 0 0 3px color-mix(in srgb,var(--brass),transparent 40%),0 0 22px color-mix(in srgb,var(--brass),transparent 45%);animation:turnglow 1.6s ease-in-out infinite}
+@keyframes turnglow{50%{box-shadow:0 0 0 2px color-mix(in srgb,var(--brass),transparent 70%),0 0 6px transparent}}
+@media (prefers-reduced-motion:reduce){.opp.turn,.me.turn{animation:none}}
+.turnptr{display:inline-block;color:var(--brass-2);font-size:20px;line-height:1;margin-inline-end:6px;animation:nudge 1s ease-in-out infinite alternate}
+@keyframes nudge{to{transform:scale(1.25)}}
 .opp.gone{opacity:.45}
 .opp .who{min-width:0;flex:0 0 auto;width:86px}
 .opp .nm{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -306,8 +310,9 @@ function newRound(s){
   s.deck=shuffle([...DECK.keys()]);s.discard=[];s.hands={};
   s.players.forEach(p=>{s.hands[p.id]=[];for(let i=0;i<RULES.handSize;i++)s.hands[p.id].push(s.deck.pop())});
   s.status='peek';s.ready={};s.turnsTaken=0;
-  s.turn=(s.round-1)%s.players.length;
-  for(let k=0;k<s.players.length&&gone(s,s.players[s.turn].id);k++)s.turn=(s.turn+1)%s.players.length;
+  const n0=s.players.length,dr=s.dir===-1?-1:1;
+  s.turn=(((s.round-1)*dr)%n0+n0)%n0;
+  for(let k=0;k<n0&&gone(s,s.players[s.turn].id);k++)s.turn=((s.turn+dr)%n0+n0)%n0;
   s.phase='draw';s.drawn=null;s.drawnFrom=null;s.action=null;s.screwBy=null;s.thiefGuess=null;s.result=null;s.flash=null;
   fx(s,null,'shuffle');addLog(s,`بدأت الجولة ${s.round}`);
 }
@@ -340,7 +345,7 @@ function endTurn(s){
   s.drawn=null;s.drawnFrom=null;s.phase='draw';s.action=null;s.turnsTaken++;
   const n=s.players.length;
   for(let k=1;k<=n;k++){
-    const idx=(s.turn+k)%n,pid=s.players[idx].id;
+    const idx=((s.turn+k*(s.dir===-1?-1:1))%n+n)%n,pid=s.players[idx].id;
     if(s.screwBy&&pid===s.screwBy){finishRound(s);return}
     if(!gone(s,pid)){s.turn=idx;return}
   }
@@ -387,6 +392,7 @@ const ACT={
     if(s.hostId!==me||s.status!=='lobby')return E('');
     s.players=s.players.filter(p=>!(p.bot&&p.id===id));return{};
   },
+  dir(s,me,{d}){if(s.hostId!==me||s.status!=='lobby')return E('');s.dir=d===-1?-1:1;return{}},
   rounds(s,me,{n}){if(s.hostId!==me||s.status!=='lobby')return E('');s.rounds=n;return{}},
   start(s,me){
     if(s.hostId!==me||s.status!=='lobby')return E('صاحب اللعبة بس يبدأ');
@@ -846,6 +852,8 @@ function renderLobby(s){
       <label>اللاعبين (${s.players.length}/${RULES.maxPlayers})</label>
       <ul class="plist">${s.players.map(p=>`<li><span class="grow">${esc(p.name)}</span>${p.bot?'<span class="chip">كمبيوتر</span>':''}${p.id===s.hostId?'<span class="chip gold">صاحب اللعبة</span>':''}${p.id===me?'<span class="chip">أنت</span>':''}${p.bot&&host?`<button class="btn sm ghost" data-a="removeBot" data-id="${esc(p.id)}" aria-label="شيل ${esc(p.name)}">✕</button>`:''}</li>`).join('')}</ul>
       ${host&&s.players.length<RULES.maxPlayers?'<button class="btn" data-a="addBot">+ أضف كمبيوتر</button>':''}
+      <label>اتجاه الدور</label>
+      <div class="seg"><button class="btn sm ${s.dir!==-1?'on':''}" data-a="dir" data-d="1" ${host?'':'disabled'}>لليمين ↺</button><button class="btn sm ${s.dir===-1?'on':''}" data-a="dir" data-d="-1" ${host?'':'disabled'}>لليسار ↻</button></div>
       <label>عدد الجولات</label>
       <div class="seg">${[3,5,7].map(n=>`<button class="btn sm ${s.rounds===n?'on':''}" data-a="rounds" data-n="${n}" ${host?'':'disabled'}>${n}</button>`).join('')}</div>
       ${host?`<button class="btn primary" data-a="start" ${s.players.length<2?'disabled':''}>ابدأ اللعب</button>${s.players.length<2?'<p class="note">بانتظار لاعب ثاني على الأقل…</p>':''}`:'<p class="note">بانتظار صاحب اللعبة يبدأ…</p>'}
@@ -904,7 +912,7 @@ function renderGame(s){
   const floorCan=canTakeFloor(s)&&!out;
 
   const oppHTML=(p,v)=>`<div class="opp ${v} ${s.status==='playing'&&cur.id===p.id?'turn':''} ${gone(s,p.id)?'gone':''}">
-      <div class="who"><div class="nm">${esc(p.name)}</div><div class="sc">${totalScore(s,p.id)} نقطة</div>
+      <div class="who"><div class="nm">${esc(p.name)}</div><div class="sc">${totalScore(s,p.id)} نقطة</div>${s.status==='playing'&&cur.id===p.id?`<span class="chip gold">${p.g==='f'?'دورها':'دوره'}</span>`:''}
       ${p.bot?'<span class="chip">كمبيوتر</span> ':''}${gone(s,p.id)?'<span class="chip">طلع</span>':s.screwBy===p.id?`<span class="chip red">${said(s,p.id)} سكرو</span>`:s.status==='peek'&&s.ready[p.id]?'<span class="chip green">جاهز</span>':''}</div>
       <div class="hand">${s.hands[p.id].map((_,i)=>slotHTML(s,p.id,i,v==='side'?'c-side':v==='top'?'c-xs':'c-op')).join('')}</div>
     </div>`;
@@ -947,7 +955,7 @@ function renderGame(s){
   }
 
   app.innerHTML=`
-    <div class="top"><span class="ttl">سكرو</span><span class="meta">جولة ${s.round} من ${s.rounds} · ${esc(s.code)}</span><span class="grow"></span>
+    <div class="top"><span class="ttl">سكرو</span><span class="meta">جولة ${s.round} من ${s.rounds} · ${esc(s.code)} · <span title="اتجاه الدور">${s.dir===-1?'↻ لليسار':'↺ لليمين'}</span></span><span class="grow"></span>
       ${soundBtn()}<button class="btn sm ghost" data-a="rules">القواعد</button><button class="btn sm ghost" data-a="exit">خروج</button></div>
     ${tbl?`<div class="table tbl"><div class="seat-top">${st.top.map(p=>oppHTML(p,'top')).join('')}</div><div class="seat-r">${st.r.map(p=>oppHTML(p,'side')).join('')}</div><div class="seat-l">${st.l.map(p=>oppHTML(p,'side')).join('')}</div>`:`<div class="opps">${st.top.map(p=>oppHTML(p,'')).join('')}</div>`}
     <div class="mid">
@@ -957,13 +965,13 @@ function renderGame(s){
         ${midDrawn}
         <div class="pile"><button class="slot${floorCan?' can':''}" data-a="takeFloor" data-zone="discard" ${top!=null?`data-face="${top}" data-label="ورقة الأرض"`:''} aria-label="الأرض"><div class="stack">${top!=null?faceHTML(top,'c-md'):'<div class="card c-md empty-pile"></div>'}</div></button><span>الأرض</span></div>
       </div>
-      <div class="status">${statusText(s)}</div>
+      <div class="status">${s.status==='playing'?`<span class="turnptr">${mine?'↓':st.r.some(p=>p.id===cur.id)?'→':st.l.some(p=>p.id===cur.id)?'←':'↑'}</span>`:''}${statusText(s)}</div>
       ${acts?`<div class="mid-acts">${acts}</div>`:''}
       <div class="log">${lastLog?esc(lastLog.m):''}</div>
     </div>
     ${tbl?'</div>':''}
     <div class="me ${mine?'turn':''}">
-      <div class="head"><span>${meP?esc(meP.name):''}</span>${meP?`<span class="chip">${totalScore(s,me)} نقطة</span>`:''}${s.screwBy===me?'<span class="chip red">قلت سكرو</span>':''}</div>
+      <div class="head"><span>${meP?esc(meP.name):''}</span>${meP?`<span class="chip">${totalScore(s,me)} نقطة</span>`:''}${mine?'<span class="chip gold">دورك!</span>':''}${s.screwBy===me?'<span class="chip red">قلت سكرو</span>':''}</div>
       <div class="hand">${myHand}</div>
       ${meP&&!out&&s.status==='playing'&&s.screwBy!==me&&s.discard.length&&!myPicksBusy(s)?'<div class="hint">اضغط على ورقتك تحرقها لو نفس ورقة الأرض</div>':''}
       ${out?`<button class="btn primary" data-a="rejoin">ارجع للعبة</button>`:''}
@@ -1038,6 +1046,8 @@ function rulesHTML(){
   <p>الهدف: أقل مجموع نقاط في آخر الجولة.</p>
   <h3>الكمبيوتر</h3>
   <p>صاحب اللعبة يقدر يضيف لاعبين كمبيوتر من غرفة الانتظار، أو يضغط "العب ضد الكمبيوتر" من البداية. الكمبيوتر يلعب من جوال صاحب اللعبة، فلازم يبقى فاتح.</p>
+  <h3>اتجاه الدور</h3>
+  <p>صاحب اللعبة يختار في غرفة الانتظار إذا الدور يمشي لليمين أو لليسار. اللي عليه الدور يطلع حوله إطار ذهبي ينبض، وسهم في النص يأشر عليه.</p>
   <h3>البداية</h3>
   <ul><li>كل لاعب ياخذ ${RULES.handSize} أوراق مقلوبة.</li><li>تشوف ورقتك 1 و 2 مرة وحدة، واحفظها.</li></ul>
   <h3>دورك</h3>
@@ -1225,6 +1235,7 @@ document.addEventListener('click',async e=>{
     case 'leaveNow':{closeSheet();if(S&&!gone(S,me)&&S.status!=='over')await commit('quit');leaveLocal();return}
     case 'endGame':closeSheet();return commit('endGame');
     case 'rejoin':{const name=S.players.find(p=>p.id===me)?.name||lsGet('skrew.name')||'لاعب';return commit('join',{name})}
+    case 'dir':return commit('dir',{d:+b.dataset.d});
     case 'rounds':return commit('rounds',{n:+b.dataset.n});
     case 'start':return commit('start');
     case 'ready':try{navigator.wakeLock?.request('screen').catch(()=>{})}catch(err){}return commit('ready');
